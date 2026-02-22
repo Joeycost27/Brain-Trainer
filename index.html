@@ -1,0 +1,1113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FocusForge — Brain Training</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+/* ────────────────────────────────────────────────
+   ROOT & RESET
+──────────────────────────────────────────────── */
+:root {
+  --bg:       #080b14;
+  --surface:  #0f1322;
+  --surface2: #161c2e;
+  --surface3: #1e253a;
+  --border:   rgba(255,255,255,0.07);
+  --text:     #e4e9f5;
+  --muted:    #6b7898;
+  --radius:   22px;
+
+  /* Category palette */
+  --ef:  #ff5e5e;
+  --wm:  #00d4c8;
+  --fs:  #ffcc00;
+  --im:  #4cd97b;
+  --er:  #ff7eb3;
+  --rw:  #4da6ff;
+  --tp:  #a278ff;
+
+  /* Activity type palette */
+  --c-streak:  #ff5e5e;
+  --c-drill:   #ffcc00;
+  --c-goal:    #4cd97b;
+  --c-reflect: #a278ff;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Nunito', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+button { font-family: 'Nunito', sans-serif; }
+
+/* ────────────────────────────────────────────────
+   STAR FIELD
+──────────────────────────────────────────────── */
+#starfield {
+  position: fixed; inset: 0;
+  pointer-events: none; z-index: 0;
+  overflow: hidden;
+}
+.star {
+  position: absolute; border-radius: 50%;
+  background: #fff; opacity: 0;
+  animation: twinkle var(--d, 4s) var(--delay, 0s) infinite ease-in-out;
+}
+@keyframes twinkle {
+  0%,100% { opacity: 0; transform: scale(0.8); }
+  50%      { opacity: var(--op, 0.6); transform: scale(1); }
+}
+
+/* ────────────────────────────────────────────────
+   LAYOUT WRAPPER
+──────────────────────────────────────────────── */
+.app {
+  position: relative; z-index: 1;
+  max-width: 1400px; margin: 0 auto;
+  padding: 0 28px 80px;
+}
+
+/* ────────────────────────────────────────────────
+   HEADER
+──────────────────────────────────────────────── */
+header {
+  display: flex; align-items: center;
+  justify-content: space-between; flex-wrap: wrap;
+  gap: 16px; padding: 28px 0 20px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 24px;
+}
+.logo {
+  display: flex; align-items: center; gap: 14px;
+}
+.logo-mark {
+  width: 52px; height: 52px; border-radius: 16px; flex-shrink: 0;
+  background: linear-gradient(135deg, #a278ff 0%, #00d4c8 100%);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24px;
+  box-shadow: 0 0 28px rgba(162,120,255,0.45), 0 4px 12px rgba(0,0,0,0.4);
+}
+.logo-text h1 {
+  font-family: 'Fredoka One', cursive;
+  font-size: 1.9rem; line-height: 1;
+  letter-spacing: 0.3px;
+  background: linear-gradient(90deg, #e4e9f5 30%, #a278ff 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+.logo-text p {
+  font-size: 0.72rem; color: var(--muted);
+  text-transform: uppercase; letter-spacing: 2px;
+  margin-top: 2px;
+}
+
+/* Teaching assistant button */
+.btn-ta {
+  display: flex; align-items: center; gap: 9px;
+  background: var(--surface2);
+  border: 1.5px solid rgba(162,120,255,0.35);
+  border-radius: 50px;
+  padding: 10px 20px;
+  color: #c4b5fd;
+  font-weight: 800; font-size: 0.85rem;
+  cursor: pointer; letter-spacing: 0.3px;
+  transition: all 0.2s;
+  position: relative; overflow: hidden;
+}
+.btn-ta::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg, rgba(162,120,255,0.15), rgba(0,212,200,0.1));
+  opacity: 0; transition: opacity 0.2s;
+}
+.btn-ta:hover { border-color: rgba(162,120,255,0.7); transform: translateY(-1px); }
+.btn-ta:hover::before { opacity: 1; }
+.ta-pulse {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: #4cd97b; flex-shrink: 0;
+  box-shadow: 0 0 8px #4cd97b;
+  animation: glow-pulse 2s infinite;
+}
+@keyframes glow-pulse {
+  0%,100% { box-shadow: 0 0 4px #4cd97b; opacity: 1; }
+  50%      { box-shadow: 0 0 12px #4cd97b; opacity: 0.6; }
+}
+
+/* ────────────────────────────────────────────────
+   STATS BAR
+──────────────────────────────────────────────── */
+.stats-bar {
+  display: flex; align-items: stretch;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: 22px; overflow: hidden;
+}
+.stat {
+  flex: 1; padding: 16px 20px;
+  text-align: center;
+  border-right: 1px solid var(--border);
+  position: relative;
+}
+.stat:last-of-type { border-right: none; }
+.stat-n {
+  font-family: 'Fredoka One', cursive;
+  font-size: 2rem; line-height: 1;
+  display: block;
+}
+.stat-l {
+  font-size: 0.68rem; text-transform: uppercase;
+  letter-spacing: 1.5px; color: var(--muted);
+  display: block; margin-top: 3px;
+}
+.stat.n1 .stat-n { color: var(--fs); text-shadow: 0 0 16px rgba(255,204,0,0.4); }
+.stat.n2 .stat-n { color: var(--ef); text-shadow: 0 0 16px rgba(255,94,94,0.4); }
+.stat.n3 .stat-n { color: var(--im); text-shadow: 0 0 16px rgba(76,217,123,0.4); }
+.stat.n4 .stat-n { color: var(--wm); text-shadow: 0 0 16px rgba(0,212,200,0.4); }
+.stat-actions {
+  display: flex; align-items: center;
+  padding: 12px 18px; gap: 10px;
+  border-left: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.btn-reset {
+  background: transparent;
+  border: 1px solid rgba(255,94,94,0.3);
+  border-radius: 50px; padding: 8px 16px;
+  color: var(--ef); font-weight: 700; font-size: 0.76rem;
+  cursor: pointer; transition: all 0.18s;
+  white-space: nowrap; letter-spacing: 0.3px;
+}
+.btn-reset:hover {
+  background: rgba(255,94,94,0.1);
+  border-color: var(--ef);
+}
+
+/* ────────────────────────────────────────────────
+   FILTER PANEL
+──────────────────────────────────────────────── */
+.filter-panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px 22px;
+  margin-bottom: 22px;
+  display: flex; flex-direction: column; gap: 14px;
+}
+.filter-row {
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+}
+.filter-label {
+  font-size: 0.68rem; text-transform: uppercase;
+  letter-spacing: 2px; color: var(--muted);
+  min-width: 64px; font-weight: 700;
+}
+.chips { display: flex; gap: 7px; flex-wrap: wrap; }
+.chip {
+  padding: 6px 15px; border-radius: 50px;
+  font-size: 0.8rem; font-weight: 700;
+  border: 1.5px solid var(--border);
+  background: var(--surface2);
+  color: var(--muted);
+  cursor: pointer; transition: all 0.16s;
+  user-select: none; white-space: nowrap;
+}
+.chip:hover { color: var(--text); border-color: rgba(255,255,255,0.2); }
+.chip.on {
+  color: #0a0d18 !important;
+  border-color: transparent;
+}
+/* per-group active colours */
+#fg-age   .chip.on { background: linear-gradient(90deg,#ffcc00,#00d4c8); }
+#fg-level .chip.on[data-v="all"]{ background: #a278ff; }
+#fg-level .chip.on[data-v="1"]  { background: #4cd97b; }
+#fg-level .chip.on[data-v="2"]  { background: #ffcc00; }
+#fg-level .chip.on[data-v="3"]  { background: #ff5e5e; }
+#fg-type  .chip.on[data-v="all"]      { background: #a278ff; }
+#fg-type  .chip.on[data-v="streak"]   { background: #ff5e5e; }
+#fg-type  .chip.on[data-v="focus_drill"]{ background: #ffcc00; }
+#fg-type  .chip.on[data-v="goal_setting"]{ background: #4cd97b; }
+#fg-type  .chip.on[data-v="reflection"]  { background: #a278ff; }
+/* category chips active — match cat colours */
+#fg-cat   .chip.on[data-v="all"]                    { background: #a278ff; }
+#fg-cat   .chip.on[data-v="Executive Function"]     { background: var(--ef); }
+#fg-cat   .chip.on[data-v="Working Memory"]         { background: var(--wm); }
+#fg-cat   .chip.on[data-v="Focus Stamina"]          { background: var(--fs); }
+#fg-cat   .chip.on[data-v="Impulse Management"]     { background: var(--im); }
+#fg-cat   .chip.on[data-v="Emotional Regulation"]   { background: var(--er); }
+#fg-cat   .chip.on[data-v="Real-World Application"] { background: var(--rw); }
+#fg-cat   .chip.on[data-v="Technical Planning"]     { background: var(--tp); }
+
+/* ────────────────────────────────────────────────
+   RESULTS INFO
+──────────────────────────────────────────────── */
+.results-row {
+  display: flex; align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px; flex-wrap: wrap; gap: 10px;
+}
+.results-count {
+  font-size: 0.8rem; color: var(--muted);
+}
+.results-count strong { color: var(--text); }
+
+/* ────────────────────────────────────────────────
+   CARD GRID
+──────────────────────────────────────────────── */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 18px;
+}
+
+/* ────────────────────────────────────────────────
+   CARDS
+──────────────────────────────────────────────── */
+.card {
+  --cc: #a278ff;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  cursor: pointer;
+  position: relative; overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s;
+  animation: riseIn 0.35s ease both;
+}
+@keyframes riseIn {
+  from { opacity:0; transform: translateY(14px) scale(0.98); }
+  to   { opacity:1; transform: translateY(0) scale(1); }
+}
+/* glint line at top */
+.card::before {
+  content: '';
+  position: absolute; top: 0; left: 16px; right: 16px; height: 2px;
+  background: linear-gradient(90deg, transparent, var(--cc), transparent);
+  opacity: 0.5; border-radius: 0 0 2px 2px;
+  transition: opacity 0.2s;
+}
+/* radial glow on hover */
+.card::after {
+  content: '';
+  position: absolute; inset: 0; border-radius: var(--radius);
+  background: radial-gradient(ellipse at 50% 0%, color-mix(in srgb, var(--cc) 12%, transparent) 0%, transparent 70%);
+  opacity: 0; transition: opacity 0.25s;
+  pointer-events: none;
+}
+.card:hover { transform: translateY(-5px); box-shadow: 0 12px 36px rgba(0,0,0,0.4); }
+.card:hover::before { opacity: 0.9; }
+.card:hover::after  { opacity: 1; }
+.card:hover { border-color: color-mix(in srgb, var(--cc) 35%, transparent); }
+
+/* completed state */
+.card.completed { border-color: rgba(76,217,123,0.3); }
+.card.completed::before { background: linear-gradient(90deg, transparent, #4cd97b, transparent); opacity: 0.6; }
+.done-badge {
+  position: absolute; top: 16px; right: 16px;
+  width: 26px; height: 26px; border-radius: 50%;
+  background: #4cd97b;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 900; color: #0a1a12;
+  box-shadow: 0 0 10px rgba(76,217,123,0.5);
+}
+
+.card-top {
+  display: flex; align-items: flex-start;
+  justify-content: space-between; gap: 8px;
+  margin-bottom: 12px;
+}
+.cat-pill {
+  font-size: 0.67rem; font-weight: 800;
+  text-transform: uppercase; letter-spacing: 1px;
+  padding: 4px 10px; border-radius: 50px;
+  background: color-mix(in srgb, var(--cc) 14%, transparent);
+  color: var(--cc);
+  border: 1px solid color-mix(in srgb, var(--cc) 28%, transparent);
+  flex-shrink: 0;
+}
+.card-badges { display: flex; gap: 6px; align-items: center; }
+.time-pill {
+  font-size: 0.7rem; font-weight: 700; color: var(--muted);
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 50px; padding: 3px 10px;
+}
+.type-dot { font-size: 1rem; line-height: 1; }
+
+.card-title {
+  font-family: 'Fredoka One', cursive;
+  font-size: 1.15rem; line-height: 1.2;
+  margin-bottom: 7px; color: var(--text);
+}
+.card-prompt {
+  font-size: 0.8rem; color: var(--muted);
+  line-height: 1.55; margin-bottom: 16px;
+}
+.card-foot {
+  display: flex; align-items: center;
+  justify-content: space-between;
+}
+.diff-dots { display: flex; gap: 4px; }
+.dd {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--surface3);
+  transition: background 0.2s;
+}
+.dd.lit { background: var(--cc); box-shadow: 0 0 5px var(--cc); }
+.aud-tag {
+  font-size: 0.67rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 1px;
+  color: var(--muted); border: 1px solid var(--border);
+  border-radius: 50px; padding: 3px 9px;
+}
+
+/* ────────────────────────────────────────────────
+   LOADING / EMPTY / ERROR STATES
+──────────────────────────────────────────────── */
+.state-panel {
+  grid-column: 1/-1;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 80px 24px; text-align: center; gap: 14px;
+}
+.state-icon { font-size: 3.2rem; }
+.state-panel h3 {
+  font-family: 'Fredoka One', cursive;
+  font-size: 1.5rem; color: var(--text);
+}
+.state-panel p { font-size: 0.86rem; color: var(--muted); max-width: 400px; line-height: 1.6; }
+.loader {
+  width: 44px; height: 44px; border-radius: 50%;
+  border: 3px solid var(--surface3);
+  border-top-color: #a278ff;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ────────────────────────────────────────────────
+   MODAL OVERLAY
+──────────────────────────────────────────────── */
+.overlay {
+  display: none; position: fixed; inset: 0; z-index: 200;
+  background: rgba(0,0,0,0.72); backdrop-filter: blur(10px);
+  align-items: center; justify-content: center; padding: 20px;
+}
+.overlay.open { display: flex; }
+
+/* ────────────────────────────────────────────────
+   ACTIVITY MODAL
+──────────────────────────────────────────────── */
+.modal {
+  --cc: #a278ff;
+  background: var(--surface2);
+  border: 1px solid color-mix(in srgb, var(--cc) 25%, var(--border));
+  border-radius: 28px;
+  padding: 30px;
+  max-width: 560px; width: 100%;
+  max-height: 90vh; overflow-y: auto;
+  animation: modalPop 0.22s ease both;
+  position: relative;
+}
+@keyframes modalPop {
+  from { opacity:0; transform: scale(0.93) translateY(16px); }
+  to   { opacity:1; transform: scale(1) translateY(0); }
+}
+/* top colour bar */
+.modal::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  background: linear-gradient(90deg, var(--cc), color-mix(in srgb, var(--cc) 40%, #00d4c8));
+  border-radius: 28px 28px 0 0;
+}
+.modal-head {
+  display: flex; justify-content: space-between;
+  align-items: flex-start; gap: 12px; margin-bottom: 18px;
+}
+.modal-meta {
+  font-size: 0.7rem; text-transform: uppercase;
+  letter-spacing: 1.5px; color: var(--cc);
+  font-weight: 800; margin-bottom: 6px;
+}
+.modal-title {
+  font-family: 'Fredoka One', cursive;
+  font-size: 1.6rem; line-height: 1.15;
+}
+.btn-close {
+  background: var(--surface3); border: 1px solid var(--border);
+  border-radius: 10px; padding: 7px 11px;
+  color: var(--muted); font-size: 1rem;
+  cursor: pointer; flex-shrink: 0;
+  transition: all 0.15s;
+}
+.btn-close:hover { color: var(--text); border-color: rgba(255,255,255,0.2); }
+
+.modal-hook {
+  background: color-mix(in srgb, var(--cc) 9%, transparent);
+  border: 1px solid color-mix(in srgb, var(--cc) 22%, transparent);
+  border-radius: 14px; padding: 14px 16px;
+  font-size: 0.92rem; font-weight: 700;
+  font-style: italic; line-height: 1.55;
+  color: var(--text); margin-bottom: 20px;
+}
+
+.sec-label {
+  font-size: 0.65rem; text-transform: uppercase;
+  letter-spacing: 2px; font-weight: 800;
+  color: var(--cc); margin-bottom: 8px;
+}
+.modal-body {
+  font-size: 0.86rem; color: var(--text);
+  line-height: 1.75; margin-bottom: 18px;
+}
+
+.success-block {
+  display: flex; gap: 10px; align-items: flex-start;
+  background: rgba(76,217,123,0.07);
+  border: 1px solid rgba(76,217,123,0.25);
+  border-radius: 13px; padding: 13px 15px;
+  margin-bottom: 18px;
+}
+.success-block .tick { font-size: 1rem; flex-shrink: 0; margin-top: 1px; }
+.success-block p { font-size: 0.82rem; color: #8de8a4; line-height: 1.55; }
+
+.materials-block {
+  display: flex; gap: 8px; align-items: center;
+  padding: 10px 14px; border-radius: 10px;
+  background: var(--surface3);
+  font-size: 0.78rem; color: var(--muted);
+  margin-bottom: 18px;
+}
+.materials-block span:first-child { font-size: 1rem; }
+
+.modal-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 22px; }
+.tag-pill {
+  font-size: 0.68rem; padding: 3px 10px;
+  border-radius: 50px; background: var(--surface3);
+  border: 1px solid var(--border); color: var(--muted);
+}
+
+.modal-actions { display: flex; gap: 10px; }
+.btn-done {
+  flex: 1; padding: 14px 20px;
+  background: linear-gradient(135deg, var(--cc), color-mix(in srgb, var(--cc) 55%, #00d4c8));
+  border: none; border-radius: 14px;
+  color: #fff; font-weight: 800; font-size: 0.92rem;
+  cursor: pointer; transition: all 0.2s;
+  box-shadow: 0 4px 18px color-mix(in srgb, var(--cc) 28%, transparent);
+}
+.btn-done:hover { transform: translateY(-2px); filter: brightness(1.08); }
+.btn-done.already {
+  background: rgba(76,217,123,0.2);
+  border: 1px solid rgba(76,217,123,0.4);
+  color: #4cd97b;
+  box-shadow: none;
+}
+.btn-later {
+  padding: 14px 18px; background: var(--surface3);
+  border: 1px solid var(--border); border-radius: 14px;
+  color: var(--muted); font-weight: 700; font-size: 0.86rem;
+  cursor: pointer; transition: all 0.15s;
+}
+.btn-later:hover { color: var(--text); border-color: rgba(255,255,255,0.2); }
+
+/* ────────────────────────────────────────────────
+   TEACHING ASSISTANT MODAL
+──────────────────────────────────────────────── */
+.ta-modal-inner {
+  max-width: 440px;
+  text-align: center;
+}
+.ta-bot {
+  width: 76px; height: 76px; border-radius: 50%;
+  background: linear-gradient(135deg, #a278ff, #00d4c8);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 36px; margin: 0 auto 18px;
+  box-shadow: 0 0 32px rgba(162,120,255,0.5);
+}
+.ta-modal-inner h2 {
+  font-family: 'Fredoka One', cursive;
+  font-size: 1.5rem; margin-bottom: 10px;
+}
+.ta-modal-inner .ta-desc {
+  font-size: 0.86rem; color: var(--muted);
+  line-height: 1.65; margin-bottom: 22px;
+}
+.ta-input-group {
+  background: var(--surface3);
+  border: 1px dashed rgba(162,120,255,0.4);
+  border-radius: 14px; padding: 18px;
+  margin-bottom: 16px; text-align: left;
+}
+.ta-input-group label {
+  display: block; font-size: 0.72rem;
+  text-transform: uppercase; letter-spacing: 1.5px;
+  color: var(--muted); font-weight: 700; margin-bottom: 8px;
+}
+.ta-input {
+  width: 100%; background: var(--bg);
+  border: 1px solid var(--border); border-radius: 10px;
+  padding: 11px 14px; color: var(--text);
+  font-size: 0.86rem; outline: none;
+  transition: border-color 0.15s;
+}
+.ta-input:focus { border-color: #a278ff; }
+.ta-input::placeholder { color: var(--muted); }
+.btn-ta-connect {
+  width: 100%; padding: 14px;
+  background: linear-gradient(135deg, #a278ff, #00d4c8);
+  border: none; border-radius: 14px;
+  color: #fff; font-weight: 800; font-size: 0.9rem;
+  cursor: pointer; transition: all 0.2s;
+  margin-bottom: 12px;
+}
+.btn-ta-connect:hover { filter: brightness(1.1); transform: translateY(-1px); }
+.btn-ta-cancel {
+  width: 100%; padding: 11px;
+  background: transparent; border: 1px solid var(--border);
+  border-radius: 12px; color: var(--muted);
+  font-weight: 700; font-size: 0.86rem; cursor: pointer;
+  transition: all 0.15s;
+}
+.btn-ta-cancel:hover { color: var(--text); border-color: rgba(255,255,255,0.2); }
+
+/* ────────────────────────────────────────────────
+   RESET CONFIRM MODAL
+──────────────────────────────────────────────── */
+.confirm-inner {
+  max-width: 380px; text-align: center;
+}
+.confirm-inner .warn-icon { font-size: 3rem; margin-bottom: 14px; }
+.confirm-inner h2 {
+  font-family: 'Fredoka One', cursive;
+  font-size: 1.4rem; margin-bottom: 10px;
+}
+.confirm-inner p { font-size: 0.84rem; color: var(--muted); line-height: 1.6; margin-bottom: 22px; }
+.confirm-btns { display: flex; gap: 10px; }
+.btn-confirm-yes {
+  flex: 1; padding: 13px;
+  background: var(--ef); border: none; border-radius: 12px;
+  color: #fff; font-weight: 800; font-size: 0.9rem;
+  cursor: pointer; transition: all 0.15s;
+}
+.btn-confirm-yes:hover { filter: brightness(1.1); }
+.btn-confirm-no {
+  flex: 1; padding: 13px;
+  background: var(--surface3); border: 1px solid var(--border);
+  border-radius: 12px; color: var(--muted);
+  font-weight: 700; font-size: 0.9rem; cursor: pointer;
+  transition: all 0.15s;
+}
+.btn-confirm-no:hover { color: var(--text); }
+
+/* ────────────────────────────────────────────────
+   TOAST
+──────────────────────────────────────────────── */
+#toast {
+  position: fixed; bottom: 28px; left: 50%;
+  transform: translateX(-50%) translateY(80px);
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 50px; padding: 11px 22px;
+  font-size: 0.86rem; font-weight: 700;
+  color: var(--text); z-index: 500;
+  transition: transform 0.3s ease;
+  pointer-events: none; white-space: nowrap;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+  display: flex; align-items: center; gap: 8px;
+}
+#toast.show { transform: translateX(-50%) translateY(0); }
+
+/* ────────────────────────────────────────────────
+   SCROLLBAR
+──────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--surface3); border-radius: 3px; }
+
+/* ────────────────────────────────────────────────
+   RESPONSIVE
+──────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .app { padding: 0 14px 60px; }
+  header { padding: 18px 0 14px; }
+  .logo-text h1 { font-size: 1.5rem; }
+  .stats-bar { flex-wrap: wrap; }
+  .stat { min-width: 80px; }
+  .stat-actions { width: 100%; border-left: none; border-top: 1px solid var(--border); justify-content: center; }
+  .grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- STARFIELD -->
+<div id="starfield"></div>
+
+<div class="app">
+
+  <!-- HEADER -->
+  <header>
+    <div class="logo">
+      <div class="logo-mark">⚡</div>
+      <div class="logo-text">
+        <h1>FocusForge</h1>
+        <p>Brain Training &amp; Mental Strength</p>
+      </div>
+    </div>
+    <button class="btn-ta" onclick="openTA()">
+      <div class="ta-pulse"></div>
+      Teaching Assistant
+    </button>
+  </header>
+
+  <!-- STATS BAR -->
+  <div class="stats-bar">
+    <div class="stat n1">
+      <span class="stat-n" id="s-done">0</span>
+      <span class="stat-l">Completed</span>
+    </div>
+    <div class="stat n2">
+      <span class="stat-n" id="s-streak">0</span>
+      <span class="stat-l">Day Streak 🔥</span>
+    </div>
+    <div class="stat n3">
+      <span class="stat-n" id="s-cats">0</span>
+      <span class="stat-l">Categories</span>
+    </div>
+    <div class="stat n4">
+      <span class="stat-n" id="s-mins">0</span>
+      <span class="stat-l">Mins Trained</span>
+    </div>
+    <div class="stat-actions">
+      <button class="btn-reset" onclick="promptReset()">↺ Reset Stats</button>
+    </div>
+  </div>
+
+  <!-- FILTERS -->
+  <div class="filter-panel">
+    <div class="filter-row">
+      <span class="filter-label">Age</span>
+      <div class="chips" id="fg-age">
+        <div class="chip on" data-v="all">All Ages</div>
+        <div class="chip" data-v="youth">🧒 Youth</div>
+        <div class="chip" data-v="adult">🧑 Adult</div>
+      </div>
+    </div>
+    <div class="filter-row">
+      <span class="filter-label">Level</span>
+      <div class="chips" id="fg-level">
+        <div class="chip on" data-v="all">All Levels</div>
+        <div class="chip" data-v="1">⭐ Beginner</div>
+        <div class="chip" data-v="2">⭐⭐ Intermediate</div>
+        <div class="chip" data-v="3">⭐⭐⭐ Advanced</div>
+      </div>
+    </div>
+    <div class="filter-row">
+      <span class="filter-label">Category</span>
+      <div class="chips" id="fg-cat">
+        <div class="chip on" data-v="all">All</div>
+        <div class="chip" data-v="Executive Function">🧠 Exec Function</div>
+        <div class="chip" data-v="Working Memory">💾 Working Memory</div>
+        <div class="chip" data-v="Focus Stamina">🎯 Focus Stamina</div>
+        <div class="chip" data-v="Impulse Management">🛑 Impulse</div>
+        <div class="chip" data-v="Emotional Regulation">💛 Emotional Reg</div>
+        <div class="chip" data-v="Real-World Application">🌍 Real World</div>
+        <div class="chip" data-v="Technical Planning">📋 Tech Planning</div>
+      </div>
+    </div>
+    <div class="filter-row">
+      <span class="filter-label">Type</span>
+      <div class="chips" id="fg-type">
+        <div class="chip on" data-v="all">All Types</div>
+        <div class="chip" data-v="streak">🔥 Streak</div>
+        <div class="chip" data-v="focus_drill">🎯 Focus Drill</div>
+        <div class="chip" data-v="goal_setting">⭐ Goal Setting</div>
+        <div class="chip" data-v="reflection">💭 Reflection</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RESULTS ROW -->
+  <div class="results-row">
+    <div class="results-count" id="results-count"></div>
+  </div>
+
+  <!-- GRID -->
+  <div class="grid" id="grid">
+    <div class="state-panel">
+      <div class="loader"></div>
+      <p style="color:var(--muted);font-size:0.86rem;">Loading question bank…</p>
+    </div>
+  </div>
+
+</div><!-- /app -->
+
+<!-- ACTIVITY MODAL -->
+<div class="overlay" id="act-overlay" onclick="overlayClick(event,'act-overlay')">
+  <div class="modal" id="act-modal"></div>
+</div>
+
+<!-- TEACHING ASSISTANT MODAL -->
+<div class="overlay" id="ta-overlay" onclick="overlayClick(event,'ta-overlay')">
+  <div class="modal ta-modal-inner" id="ta-modal">
+    <div class="ta-bot">🤖</div>
+    <h2>Teaching Assistant</h2>
+    <p class="ta-desc">
+      Your AI Teaching Assistant can help explain activities, answer questions about techniques,
+      and guide your brain training journey. Paste your project link below to connect.
+    </p>
+    <div class="ta-input-group">
+      <label>Project / Assistant Link</label>
+      <input class="ta-input" id="ta-link-input" type="url" placeholder="https://…" />
+    </div>
+    <button class="btn-ta-connect" onclick="connectTA()">Connect Assistant →</button>
+    <button class="btn-ta-cancel" onclick="closeOverlay('ta-overlay')">Cancel</button>
+  </div>
+</div>
+
+<!-- RESET CONFIRM MODAL -->
+<div class="overlay" id="reset-overlay" onclick="overlayClick(event,'reset-overlay')">
+  <div class="modal confirm-inner">
+    <div class="warn-icon">⚠️</div>
+    <h2>Reset All Stats?</h2>
+    <p>This will clear your completed activities, streak, and training minutes. This cannot be undone.</p>
+    <div class="confirm-btns">
+      <button class="btn-confirm-yes" onclick="doReset()">Yes, Reset</button>
+      <button class="btn-confirm-no"  onclick="closeOverlay('reset-overlay')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<script>
+/* ══════════════════════════════════════════════
+   STARFIELD
+══════════════════════════════════════════════ */
+(function buildStars() {
+  const sf = document.getElementById('starfield');
+  for (let i = 0; i < 160; i++) {
+    const s = document.createElement('div');
+    s.className = 'star';
+    const sz = Math.random() * 2.2 + 0.4;
+    s.style.cssText = `
+      width:${sz}px; height:${sz}px;
+      left:${Math.random()*100}%; top:${Math.random()*100}%;
+      --op:${0.3 + Math.random()*0.55};
+      --d:${3+Math.random()*5}s;
+      --delay:${Math.random()*6}s;
+    `;
+    sf.appendChild(s);
+  }
+})();
+
+/* ══════════════════════════════════════════════
+   CONSTANTS
+══════════════════════════════════════════════ */
+const TSV_FILE = 'question_bank.tsv';
+
+const CAT_COLOR = {
+  'Executive Function':    '#ff5e5e',
+  'Working Memory':        '#00d4c8',
+  'Focus Stamina':         '#ffcc00',
+  'Impulse Management':    '#4cd97b',
+  'Emotional Regulation':  '#ff7eb3',
+  'Real-World Application':'#4da6ff',
+  'Technical Planning':    '#a278ff'
+};
+const TYPE_ICON  = { streak:'🔥', focus_drill:'🎯', goal_setting:'⭐', reflection:'💭' };
+const TYPE_LABEL = { streak:'Streak', focus_drill:'Focus Drill', goal_setting:'Goal Setting', reflection:'Reflection' };
+const AUD_LABEL  = { both:'All Ages', youth:'🧒 Youth', adult:'🧑 Adult' };
+
+/* Column indices (TSV header order) */
+const F = { id:0,cat:1,sub:2,aud:3,diff:4,type:5,time:6,
+            title:7,prompt:8,instr:9,success:10,mats:11,sensory:12,tags:13 };
+
+/* ══════════════════════════════════════════════
+   STATE
+══════════════════════════════════════════════ */
+let ROWS  = [];   // parsed TSV rows (excluding header)
+let stats = loadStats();
+let filters = { age:'all', level:'all', cat:'all', type:'all' };
+let currentIdx = null;
+
+function loadStats() {
+  try {
+    return JSON.parse(localStorage.getItem('ff_stats') || 'null') ||
+      { done:{}, streak:0, lastDate:'', mins:0, cats:{} };
+  } catch { return { done:{}, streak:0, lastDate:'', mins:0, cats:{} }; }
+}
+function saveStats() {
+  localStorage.setItem('ff_stats', JSON.stringify(stats));
+}
+
+/* ══════════════════════════════════════════════
+   TSV LOADER
+══════════════════════════════════════════════ */
+async function loadTSV() {
+  try {
+    const res = await fetch(TSV_FILE);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const text = await res.text();
+    const lines = text.trim().split('\n');
+    // Skip header row (index 0)
+    ROWS = lines.slice(1).map(line => line.split('\t'));
+    renderGrid();
+    updateStats();
+  } catch (err) {
+    document.getElementById('grid').innerHTML = `
+      <div class="state-panel">
+        <div class="state-icon">📂</div>
+        <h3>Question bank not found</h3>
+        <p>Make sure <strong>${TSV_FILE}</strong> is in the same directory as this page.<br>
+        Then reload — the app will pick it up automatically.</p>
+      </div>`;
+    document.getElementById('results-count').textContent = '';
+  }
+}
+
+/* ══════════════════════════════════════════════
+   FILTERS
+══════════════════════════════════════════════ */
+['fg-age','fg-level','fg-cat','fg-type'].forEach((gid, gi) => {
+  const key = ['age','level','cat','type'][gi];
+  document.getElementById(gid).addEventListener('click', e => {
+    const chip = e.target.closest('.chip');
+    if (!chip) return;
+    document.querySelectorAll(`#${gid} .chip`).forEach(c => c.classList.remove('on'));
+    chip.classList.add('on');
+    filters[key] = chip.dataset.v;
+    renderGrid();
+  });
+});
+
+function getFiltered() {
+  return ROWS.filter(r => {
+    const aud = r[F.aud];
+    if (filters.age !== 'all') {
+      if (filters.age === 'youth' && aud === 'adult')  return false;
+      if (filters.age === 'adult' && aud === 'youth')  return false;
+    }
+    if (filters.level !== 'all' && r[F.diff] !== filters.level) return false;
+    if (filters.cat   !== 'all' && r[F.cat]  !== filters.cat)   return false;
+    if (filters.type  !== 'all' && r[F.type] !== filters.type)  return false;
+    return true;
+  });
+}
+
+/* ══════════════════════════════════════════════
+   RENDER GRID
+══════════════════════════════════════════════ */
+function renderGrid() {
+  const grid    = document.getElementById('grid');
+  const filtered = getFiltered();
+  const total    = ROWS.length;
+
+  document.getElementById('results-count').innerHTML =
+    `<strong>${filtered.length}</strong> activit${filtered.length===1?'y':'ies'}` +
+    (filtered.length < total ? ` &nbsp;·&nbsp; ${total} total` : '');
+
+  if (!filtered.length) {
+    grid.innerHTML = `<div class="state-panel">
+      <div class="state-icon">🔭</div>
+      <h3>No activities found</h3>
+      <p>Try adjusting the filters above to explore more of the question bank.</p>
+    </div>`;
+    return;
+  }
+
+  grid.innerHTML = filtered.map((r, i) => {
+    const cc   = CAT_COLOR[r[F.cat]] || '#a278ff';
+    const diff = parseInt(r[F.diff]) || 1;
+    const done = stats.done[r[F.id]];
+    const dots = [1,2,3].map(d => `<div class="dd${d<=diff?' lit':''}"></div>`).join('');
+    const delay = (i % 18) * 0.035;
+
+    return `<div class="card${done?' completed':''}"
+         style="--cc:${cc};animation-delay:${delay}s"
+         onclick="openActivity(${ROWS.indexOf(r)})">
+      ${done ? `<div class="done-badge">✓</div>` : ''}
+      <div class="card-top">
+        <div class="cat-pill">${r[F.cat]}</div>
+        <div class="card-badges">
+          <span class="time-pill">⏱ ${r[F.time]}m</span>
+          <span class="type-dot">${TYPE_ICON[r[F.type]]||'📌'}</span>
+        </div>
+      </div>
+      <div class="card-title">${r[F.title]}</div>
+      <div class="card-prompt">${r[F.prompt]}</div>
+      <div class="card-foot">
+        <div class="diff-dots">${dots}</div>
+        <span class="aud-tag">${AUD_LABEL[r[F.aud]]||r[F.aud]}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ══════════════════════════════════════════════
+   ACTIVITY MODAL
+══════════════════════════════════════════════ */
+function openActivity(idx) {
+  currentIdx = idx;
+  const r  = ROWS[idx];
+  const cc = CAT_COLOR[r[F.cat]] || '#a278ff';
+  const done = stats.done[r[F.id]];
+  const diff = parseInt(r[F.diff]) || 1;
+  const tags = (r[F.tags]||'').split(',').map(t =>
+    `<span class="tag-pill">${t.trim()}</span>`).join('');
+  const levelTxt = ['','Beginner','Intermediate','Advanced'][diff] || '';
+
+  document.getElementById('act-modal').style.setProperty('--cc', cc);
+  document.getElementById('act-modal').innerHTML = `
+    <div class="modal-head">
+      <div>
+        <div class="modal-meta">${r[F.cat]} &nbsp;·&nbsp; ${r[F.sub]} &nbsp;·&nbsp; ${levelTxt}</div>
+        <div class="modal-title">${r[F.title]}</div>
+      </div>
+      <button class="btn-close" onclick="closeOverlay('act-overlay')">✕</button>
+    </div>
+    <div class="modal-hook">"${r[F.prompt]}"</div>
+    <div class="sec-label">What to do</div>
+    <div class="modal-body">${r[F.instr]}</div>
+    <div class="sec-label">You've succeeded when…</div>
+    <div class="success-block">
+      <span class="tick">✅</span>
+      <p>${r[F.success]}</p>
+    </div>
+    ${r[F.mats] && r[F.mats] !== 'none' ? `
+    <div class="materials-block">
+      <span>🎒</span>
+      <span>You'll need: <strong>${r[F.mats]}</strong></span>
+    </div>` : ''}
+    <div class="modal-tags">${tags}</div>
+    <div class="modal-actions">
+      <button class="btn-done${done?' already':''}" onclick="markDone(${idx})">
+        ${done ? '✓ Completed' : '✅ Mark as Done'}
+      </button>
+      <button class="btn-later" onclick="closeOverlay('act-overlay')">Later</button>
+    </div>`;
+
+  document.getElementById('act-overlay').classList.add('open');
+}
+
+function markDone(idx) {
+  const r = ROWS[idx];
+  if (stats.done[r[F.id]]) return; // already done
+
+  stats.done[r[F.id]] = Date.now();
+  stats.mins += parseInt(r[F.time]) || 0;
+  stats.cats[r[F.cat]] = true;
+
+  // streak logic
+  const today = new Date().toDateString();
+  if (stats.lastDate !== today) {
+    const yesterday = new Date(Date.now() - 86400000).toDateString();
+    stats.streak = (stats.lastDate === yesterday) ? stats.streak + 1 : 1;
+    stats.lastDate = today;
+  }
+
+  saveStats();
+  updateStats();
+  renderGrid();
+  closeOverlay('act-overlay');
+  showToast('⚡ Activity complete! Keep going.');
+}
+
+/* ══════════════════════════════════════════════
+   STATS DISPLAY
+══════════════════════════════════════════════ */
+function updateStats() {
+  const doneCount = Object.keys(stats.done).length;
+  const catCount  = Object.keys(stats.cats).length;
+  animCount('s-done',   doneCount);
+  animCount('s-streak', stats.streak);
+  animCount('s-cats',   catCount);
+  animCount('s-mins',   stats.mins);
+}
+
+function animCount(id, target) {
+  const el  = document.getElementById(id);
+  const cur = parseInt(el.textContent) || 0;
+  if (cur === target) return;
+  const step = Math.ceil(Math.abs(target - cur) / 20);
+  let val = cur;
+  const t = setInterval(() => {
+    val = val < target ? Math.min(val + step, target) : Math.max(val - step, target);
+    el.textContent = val;
+    if (val === target) clearInterval(t);
+  }, 30);
+}
+
+/* ══════════════════════════════════════════════
+   RESET
+══════════════════════════════════════════════ */
+function promptReset() {
+  document.getElementById('reset-overlay').classList.add('open');
+}
+function doReset() {
+  stats = { done:{}, streak:0, lastDate:'', mins:0, cats:{} };
+  saveStats();
+  updateStats();
+  renderGrid();
+  closeOverlay('reset-overlay');
+  showToast('Stats have been reset.');
+}
+
+/* ══════════════════════════════════════════════
+   TEACHING ASSISTANT
+══════════════════════════════════════════════ */
+function openTA() {
+  const saved = localStorage.getItem('ff_ta_link') || '';
+  document.getElementById('ta-link-input').value = saved;
+  document.getElementById('ta-overlay').classList.add('open');
+}
+function connectTA() {
+  const val = document.getElementById('ta-link-input').value.trim();
+  if (val) {
+    localStorage.setItem('ff_ta_link', val);
+    window.open(val, '_blank');
+    closeOverlay('ta-overlay');
+    showToast('🤖 Teaching Assistant connected!');
+  } else {
+    document.getElementById('ta-link-input').focus();
+  }
+}
+
+/* ══════════════════════════════════════════════
+   OVERLAY HELPERS
+══════════════════════════════════════════════ */
+function closeOverlay(id) {
+  document.getElementById(id).classList.remove('open');
+}
+function overlayClick(e, id) {
+  if (e.target === document.getElementById(id)) closeOverlay(id);
+}
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    ['act-overlay','ta-overlay','reset-overlay'].forEach(closeOverlay);
+  }
+});
+
+/* ══════════════════════════════════════════════
+   TOAST
+══════════════════════════════════════════════ */
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+/* ══════════════════════════════════════════════
+   BOOT
+══════════════════════════════════════════════ */
+loadTSV();
+</script>
+</body>
+</html>
