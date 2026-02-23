@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FocusForge — Brain Training Hub</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Exo+2:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#07090f; --bg2:#0c0f1a; --surface:#111625; --surface2:#181e30; --surface3:#1f263d;
+  --border:rgba(255,255,255,0.06); --border2:rgba(255,255,255,0.12);
+  --text:#dde3f5; --muted:#5a6585; --muted2:#8591b0;
+  --gold:#ffd447; --teal:#00e5cc; --rose:#ff5e7d; --lime:#5cff8f;
+  --violet:#9b6dff; --sky:#41b8ff; --amber:#ff9a3c;
+  --cat-ef:#ff5e5e; --cat-wm:#00d4c8; --cat-fs:#ffcc00;
+  --cat-im:#4cd97b; --cat-er:#ff7eb3; --cat-rw:#4da6ff; --cat-tp:#a278ff;
+  --r:20px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Exo 2',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+button{font-family:'Exo 2',sans-serif;cursor:pointer}
+
+body::before{
+  content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:
+    radial-gradient(ellipse 80% 50% at 20% 10%,rgba(155,109,255,.07) 0%,transparent 60%),
+    radial-gradient(ellipse 60% 40% at 80% 80%,rgba(0,229,204,.05) 0%,transparent 60%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='100'%3E%3Cpath d='M28 0 L56 15 L56 45 L28 60 L0 45 L0 15 Z' fill='none' stroke='rgba(255,255,255,0.022)' stroke-width='1'/%3E%3Cpath d='M28 60 L56 75 L56 100' fill='none' stroke='rgba(255,255,255,0.022)' stroke-width='1'/%3E%3Cpath d='M28 60 L0 75 L0 100' fill='none' stroke='rgba(255,255,255,0.022)' stroke-width='1'/%3E%3C/svg%3E");
+}
+
+.wrap{position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:0 24px 100px}
+
+/* HEADER */
+header{display:flex;align-items:center;justify-content:space-between;padding:28px 0 0;gap:16px;flex-wrap:wrap;animation:fadeDown .5s ease both}
+@keyframes fadeDown{from{opacity:0;transform:translateY(-12px)}to{opacity:1;transform:translateY(0)}}
+.logo{display:flex;align-items:center;gap:14px}
+.logo-gem{width:54px;height:54px;border-radius:18px;flex-shrink:0;background:linear-gradient(140deg,#9b6dff 0%,#00e5cc 100%);display:flex;align-items:center;justify-content:center;font-size:26px;position:relative;box-shadow:0 0 0 1px rgba(155,109,255,.3),0 8px 28px rgba(155,109,255,.35)}
+.logo-gem::after{content:'';position:absolute;inset:0;border-radius:18px;background:linear-gradient(140deg,rgba(255,255,255,.25) 0%,transparent 60%)}
+.logo-words h1{font-family:'Fredoka One',cursive;font-size:2rem;line-height:1;letter-spacing:.5px;background:linear-gradient(90deg,#fff 0%,#9b6dff 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.logo-words p{font-size:.7rem;text-transform:uppercase;letter-spacing:2.5px;color:var(--muted);margin-top:3px;font-weight:600}
+.header-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+
+.player-chip{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--border2);border-radius:50px;padding:6px 14px 6px 6px}
+.player-avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--violet),var(--teal));display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;cursor:pointer}
+.player-name{font-size:.82rem;font-weight:700;cursor:pointer;line-height:1.2}
+.player-level-lbl{font-size:.62rem;color:var(--gold);font-weight:600;text-transform:uppercase;letter-spacing:1px}
+
+.btn-ta{display:flex;align-items:center;gap:8px;background:var(--surface2);border:1.5px solid rgba(155,109,255,.35);border-radius:50px;padding:9px 18px;color:#c4b5fd;font-weight:700;font-size:.82rem;transition:all .2s;letter-spacing:.3px}
+.btn-ta:hover{border-color:rgba(155,109,255,.7);background:rgba(155,109,255,.12);transform:translateY(-1px)}
+.ta-dot{width:7px;height:7px;border-radius:50%;background:var(--lime);flex-shrink:0;box-shadow:0 0 8px var(--lime);animation:pulseDot 2s infinite}
+@keyframes pulseDot{0%,100%{opacity:1;box-shadow:0 0 4px var(--lime)}50%{opacity:.5;box-shadow:0 0 14px var(--lime)}}
+
+/* XP BAR */
+.xp-wrap{margin:20px 0;animation:fadeUp .5s .1s ease both}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.xp-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:7px}
+.xp-lv-label{font-family:'Fredoka One',cursive;font-size:1rem;color:var(--gold);display:flex;align-items:center;gap:8px}
+.lv-badge{background:var(--gold);color:#1a1000;font-size:.7rem;font-weight:900;padding:2px 8px;border-radius:50px;letter-spacing:.5px}
+.xp-next-lbl{font-size:.72rem;color:var(--muted2);font-weight:600}
+.xp-track{height:8px;border-radius:50px;background:var(--surface2);border:1px solid var(--border);overflow:hidden}
+.xp-fill{height:100%;border-radius:50px;background:linear-gradient(90deg,var(--violet),var(--teal));transition:width 1s cubic-bezier(.4,0,.2,1);box-shadow:0 0 10px rgba(155,109,255,.5);position:relative}
+.xp-fill::after{content:'';position:absolute;top:0;right:0;bottom:0;width:30px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.3));animation:shimmer 2s infinite}
+@keyframes shimmer{from{transform:translateX(-30px)}to{transform:translateX(30px)}}
+
+/* STATS ROW */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:28px;animation:fadeUp .5s .15s ease both}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:16px 18px;position:relative;overflow:hidden;transition:border-color .2s,transform .2s}
+.stat-card:hover{transform:translateY(-2px);border-color:var(--border2)}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--acc,#9b6dff);opacity:.6}
+.stat-card.s1{--acc:var(--gold)}.stat-card.s2{--acc:var(--rose)}.stat-card.s3{--acc:var(--lime)}.stat-card.s4{--acc:var(--teal)}
+.sc-num{font-family:'Fredoka One',cursive;font-size:2.2rem;line-height:1;color:var(--acc);text-shadow:0 0 20px color-mix(in srgb,var(--acc) 40%,transparent)}
+.sc-label{font-size:.68rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);margin-top:4px;font-weight:600}
+
+/* PORTALS */
+.portals{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:28px;animation:fadeUp .5s .2s ease both}
+.portal{border-radius:24px;padding:32px 28px;position:relative;overflow:hidden;display:block;border:1px solid transparent;transition:transform .25s ease,box-shadow .25s ease}
+.portal:hover{transform:translateY(-6px)}
+.portal-daily{background:linear-gradient(140deg,#1a0d2e 0%,#0f1a35 50%,#0a1520 100%);border-color:rgba(155,109,255,.25);box-shadow:0 8px 40px rgba(155,109,255,.12)}
+.portal-daily:hover{border-color:rgba(155,109,255,.5);box-shadow:0 16px 60px rgba(155,109,255,.22)}
+.portal-game{background:linear-gradient(140deg,#001f2e 0%,#001a1a 50%,#0a1a0a 100%);border-color:rgba(0,229,204,.2);box-shadow:0 8px 40px rgba(0,229,204,.1)}
+.portal-game:hover{border-color:rgba(0,229,204,.45);box-shadow:0 16px 60px rgba(0,229,204,.2)}
+.portal::before{content:'';position:absolute;width:200px;height:200px;border-radius:50%;top:-60px;right:-40px;background:radial-gradient(circle,var(--pg,rgba(155,109,255,.2)) 0%,transparent 70%);pointer-events:none;transition:transform .3s}
+.portal:hover::before{transform:scale(1.3)}
+.portal-daily{--pg:rgba(155,109,255,.25)}.portal-game{--pg:rgba(0,229,204,.2)}
+.portal::after{content:'';position:absolute;inset:0;background:repeating-linear-gradient(90deg,rgba(255,255,255,.012) 0px,rgba(255,255,255,.012) 1px,transparent 1px,transparent 40px),repeating-linear-gradient(0deg,rgba(255,255,255,.012) 0px,rgba(255,255,255,.012) 1px,transparent 1px,transparent 40px);pointer-events:none;border-radius:24px}
+.portal-icon{font-size:3rem;margin-bottom:14px;display:block;line-height:1;filter:drop-shadow(0 4px 12px rgba(255,255,255,.1))}
+.portal-lbl{font-size:.65rem;text-transform:uppercase;letter-spacing:3px;font-weight:700;margin-bottom:8px}
+.portal-daily .portal-lbl{color:#9b6dff}.portal-game .portal-lbl{color:#00e5cc}
+.portal-title{font-family:'Fredoka One',cursive;font-size:1.7rem;line-height:1.1;margin-bottom:10px}
+.portal-desc{font-size:.82rem;color:var(--muted2);line-height:1.6;margin-bottom:20px}
+.portal-cta{display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border-radius:50px;font-weight:800;font-size:.82rem;letter-spacing:.5px;transition:all .2s}
+.portal-daily .portal-cta{background:rgba(155,109,255,.18);border:1.5px solid rgba(155,109,255,.4);color:#c4b5fd}
+.portal-daily:hover .portal-cta{background:rgba(155,109,255,.3)}
+.portal-game .portal-cta{background:rgba(0,229,204,.12);border:1.5px solid rgba(0,229,204,.35);color:#7ffff4}
+.portal-game:hover .portal-cta{background:rgba(0,229,204,.22)}
+.streak-pill{position:absolute;top:20px;right:20px;background:rgba(255,212,71,.15);border:1px solid rgba(255,212,71,.35);border-radius:50px;padding:5px 12px;font-size:.75rem;font-weight:800;color:var(--gold);z-index:1;display:none}
+
+/* BOTTOM GRID */
+.bottom-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px;animation:fadeUp .5s .25s ease both}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:22px}
+.panel-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.panel-title{font-family:'Fredoka One',cursive;font-size:1.1rem;display:flex;align-items:center;gap:8px}
+.panel-count{font-size:.72rem;color:var(--muted2);background:var(--surface2);border:1px solid var(--border);border-radius:50px;padding:3px 10px;font-weight:600}
+
+/* BADGES */
+.badge-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+.badge-item{display:flex;flex-direction:column;align-items:center;gap:5px;padding:10px 4px;border-radius:14px;border:1px solid var(--border);background:var(--surface2);transition:all .2s;position:relative}
+.badge-item.earned{border-color:color-mix(in srgb,var(--bc,#9b6dff) 40%,transparent);background:color-mix(in srgb,var(--bc,#9b6dff) 8%,var(--surface2));box-shadow:0 4px 16px color-mix(in srgb,var(--bc,#9b6dff) 15%,transparent)}
+.badge-item.earned:hover{transform:translateY(-3px) scale(1.05)}
+.badge-emoji{font-size:1.5rem;line-height:1;transition:transform .2s}
+.badge-item.earned:hover .badge-emoji{transform:scale(1.2)}
+.badge-name{font-size:.56rem;text-align:center;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.5px;line-height:1.2}
+.badge-item.earned .badge-name{color:var(--muted2)}
+.badge-item:not(.earned) .badge-emoji{filter:grayscale(1);opacity:.2}
+.badge-item:not(.earned) .badge-name{opacity:.3}
+.badge-item::after{content:attr(data-tip);position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%) translateY(4px);background:var(--surface3);border:1px solid var(--border2);border-radius:8px;padding:5px 10px;font-size:.68rem;white-space:nowrap;color:var(--text);opacity:0;pointer-events:none;transition:opacity .15s,transform .15s;z-index:10}
+.badge-item:hover::after{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ACTIVITY FEED */
+.activity-list{display:flex;flex-direction:column;gap:8px}
+.activity-item{display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:14px;background:var(--surface2);border:1px solid var(--border);transition:border-color .15s}
+.activity-item:hover{border-color:var(--border2)}
+.act-icon{width:36px;height:36px;border-radius:10px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:1rem;background:color-mix(in srgb,var(--ac,#9b6dff) 15%,transparent)}
+.act-body{flex:1;min-width:0}
+.act-title{font-size:.8rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.act-sub{font-size:.68rem;color:var(--muted);margin-top:2px}
+.act-xp{font-family:'Fredoka One',cursive;font-size:.9rem;color:var(--gold);flex-shrink:0}
+.empty-feed{text-align:center;padding:28px 12px;color:var(--muted);font-size:.82rem;line-height:1.7}
+.empty-feed .ef-icon{font-size:2.2rem;display:block;margin-bottom:8px}
+
+/* CAT PROGRESS */
+.cat-progress{margin-bottom:18px;animation:fadeUp .5s .3s ease both}
+.cat-bars{display:flex;flex-direction:column;gap:10px;margin-top:4px}
+.cat-bar-row{display:flex;align-items:center;gap:10px}
+.cat-bar-lbl{font-size:.7rem;font-weight:700;width:126px;flex-shrink:0;display:flex;align-items:center;gap:5px;color:var(--muted2)}
+.cat-bar-track{flex:1;height:7px;border-radius:50px;background:var(--surface2);overflow:hidden;border:1px solid var(--border)}
+.cat-bar-fill{height:100%;border-radius:50px;background:var(--bc,#9b6dff);transition:width 1.2s cubic-bezier(.4,0,.2,1);box-shadow:0 0 8px var(--bc,#9b6dff)}
+.cat-bar-pct{font-size:.68rem;font-weight:700;color:var(--muted2);width:32px;text-align:right;flex-shrink:0}
+
+/* FOOTER */
+.site-footer{position:fixed;bottom:0;left:0;right:0;z-index:50;background:linear-gradient(to top,var(--bg) 60%,transparent);padding:18px 24px;display:flex;justify-content:flex-end;pointer-events:none}
+.btn-parent{pointer-events:all;background:transparent;border:1px solid var(--border);border-radius:50px;padding:7px 16px;font-size:.7rem;color:var(--muted);font-weight:600;letter-spacing:.5px;text-transform:uppercase;transition:all .15s}
+.btn-parent:hover{border-color:var(--border2);color:var(--muted2)}
+
+/* OVERLAYS */
+.overlay{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.78);backdrop-filter:blur(12px);align-items:flex-end;justify-content:center}
+.overlay.open{display:flex}
+.overlay.center{align-items:center;padding:20px}
+
+/* PARENT PANEL */
+.parent-panel{background:var(--surface);border:1px solid var(--border2);border-bottom:none;border-radius:28px 28px 0 0;padding:28px 28px 36px;width:100%;max-width:680px;max-height:85vh;overflow-y:auto;animation:slideUp .3s ease both}
+@keyframes slideUp{from{transform:translateY(40px);opacity:0}to{transform:translateY(0);opacity:1}}
+.drag-bar{width:40px;height:4px;border-radius:2px;background:var(--surface3);margin:0 auto 22px}
+.parent-panel h2{font-family:'Fredoka One',cursive;font-size:1.4rem;margin-bottom:6px}
+.pp-sub{font-size:.8rem;color:var(--muted);margin-bottom:22px;line-height:1.5}
+.ret-row{display:flex;align-items:center;gap:10px;margin-bottom:18px;flex-wrap:wrap}
+.ret-lbl{font-size:.7rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);font-weight:700}
+.ret-chip{padding:5px 14px;border-radius:50px;font-size:.76rem;font-weight:700;border:1.5px solid var(--border);background:var(--surface2);color:var(--muted);transition:all .15s}
+.ret-chip.on{background:var(--violet);border-color:var(--violet);color:#fff}
+.history-table{width:100%;border-collapse:collapse;font-size:.78rem;margin-bottom:20px}
+.history-table th{text-align:left;padding:8px 10px;font-size:.65rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);border-bottom:1px solid var(--border);font-weight:700}
+.history-table td{padding:9px 10px;border-bottom:1px solid var(--border);color:var(--muted2)}
+.history-table tr:last-child td{border-bottom:none}
+.mode-pill{font-size:.68rem;padding:2px 8px;border-radius:50px;font-weight:700;display:inline-block}
+.mode-daily{background:rgba(155,109,255,.15);color:#c4b5fd}
+.mode-game{background:rgba(0,229,204,.12);color:#7ffff4}
+.no-hist{text-align:center;padding:24px;color:var(--muted);font-size:.82rem}
+.pp-actions{display:flex;gap:10px;flex-wrap:wrap}
+.pp-btn{flex:1;min-width:140px;padding:12px;border-radius:14px;font-weight:700;font-size:.82rem;transition:all .18s;letter-spacing:.3px;border:1px solid var(--border)}
+.pp-btn.dl{background:var(--surface2);color:var(--teal);border-color:rgba(0,229,204,.3)}
+.pp-btn.dl:hover{background:rgba(0,229,204,.1)}
+.pp-btn.wipe{background:var(--surface2);color:var(--rose);border-color:rgba(255,94,125,.3)}
+.pp-btn.wipe:hover{background:rgba(255,94,125,.1)}
+.pp-btn.cls{background:var(--surface3);color:var(--muted2)}
+.pp-btn.cls:hover{color:var(--text)}
+
+/* NAME MODAL */
+.modal-box{background:var(--surface);border:1px solid var(--border2);border-radius:24px;padding:28px;max-width:380px;width:100%;animation:popIn .2s ease both;text-align:center}
+@keyframes popIn{from{opacity:0;transform:scale(.92)}to{opacity:1;transform:scale(1)}}
+.modal-box h3{font-family:'Fredoka One',cursive;font-size:1.3rem;margin-bottom:8px}
+.modal-box .sub{font-size:.82rem;color:var(--muted);margin-bottom:18px}
+.name-input{width:100%;background:var(--surface2);border:1.5px solid var(--border2);border-radius:12px;padding:12px 14px;color:var(--text);font-size:.92rem;outline:none;text-align:center;font-weight:700;margin-bottom:16px;transition:border-color .15s;font-family:'Exo 2',sans-serif}
+.name-input:focus{border-color:var(--violet)}
+.av-row{display:flex;justify-content:center;gap:10px;margin-bottom:18px;flex-wrap:wrap}
+.av-opt{width:44px;height:44px;border-radius:50%;background:var(--surface3);border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:1.3rem;cursor:pointer;transition:all .15s}
+.av-opt.on,.av-opt:hover{border-color:var(--violet);background:rgba(155,109,255,.15);transform:scale(1.1)}
+.btn-primary{width:100%;padding:13px;background:linear-gradient(135deg,var(--violet),var(--teal));border:none;border-radius:13px;color:#fff;font-weight:800;font-size:.88rem;transition:filter .15s;font-family:'Exo 2',sans-serif}
+.btn-primary:hover{filter:brightness(1.1)}
+.btn-ghost{width:100%;padding:11px;background:transparent;border:1px solid var(--border);border-radius:12px;color:var(--muted);font-weight:700;font-size:.84rem;margin-top:8px;transition:all .15s;font-family:'Exo 2',sans-serif}
+.btn-ghost:hover{color:var(--text);border-color:var(--border2)}
+
+/* TA MODAL */
+.ta-modal{background:var(--surface);border:1px solid rgba(155,109,255,.3);border-radius:24px;padding:28px;max-width:400px;width:100%;text-align:center;animation:popIn .2s ease both}
+.ta-orb{width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,#9b6dff,#00e5cc);margin:0 auto 16px;font-size:34px;display:flex;align-items:center;justify-content:center;box-shadow:0 0 32px rgba(155,109,255,.45)}
+.ta-modal h3{font-family:'Fredoka One',cursive;font-size:1.4rem;margin-bottom:8px}
+.ta-modal p{font-size:.82rem;color:var(--muted);line-height:1.6;margin-bottom:18px}
+.ta-input{width:100%;background:var(--surface2);border:1.5px solid var(--border2);border-radius:12px;padding:11px 14px;color:var(--text);font-size:.86rem;outline:none;margin-bottom:12px;transition:border-color .15s;font-family:'Exo 2',sans-serif}
+.ta-input:focus{border-color:var(--violet)}
+
+/* CONFIRM */
+.confirm-modal{background:var(--surface);border:1px solid rgba(255,94,125,.3);border-radius:24px;padding:28px;max-width:360px;width:100%;text-align:center;animation:popIn .2s ease both}
+.confirm-modal .warn{font-size:2.5rem;margin-bottom:12px}
+.confirm-modal h3{font-family:'Fredoka One',cursive;font-size:1.3rem;margin-bottom:8px}
+.confirm-modal p{font-size:.82rem;color:var(--muted);margin-bottom:22px;line-height:1.5}
+.confirm-btns{display:flex;gap:10px}
+.btn-yes{flex:1;padding:12px;background:var(--rose);border:none;border-radius:12px;color:#fff;font-weight:800;font-size:.88rem;transition:filter .15s;font-family:'Exo 2',sans-serif}
+.btn-yes:hover{filter:brightness(1.1)}
+.btn-no{flex:1;padding:12px;background:var(--surface3);border:1px solid var(--border);border-radius:12px;color:var(--muted2);font-weight:700;font-size:.88rem;transition:all .15s;font-family:'Exo 2',sans-serif}
+.btn-no:hover{color:var(--text)}
+
+/* LEVEL UP */
+.lvup-burst{position:fixed;inset:0;z-index:300;display:flex;align-items:center;justify-content:center;pointer-events:none;opacity:0;transition:opacity .3s}
+.lvup-burst.show{opacity:1}
+.lvup-card{background:linear-gradient(140deg,#1a0d35,#0a1e3a);border:1.5px solid rgba(155,109,255,.5);border-radius:28px;padding:40px 48px;text-align:center;box-shadow:0 0 80px rgba(155,109,255,.4);animation:burstPop .4s ease both}
+@keyframes burstPop{from{transform:scale(.7);opacity:0}to{transform:scale(1);opacity:1}}
+.lvup-icon{font-size:3.5rem;display:block;margin-bottom:10px}
+.lvup-card h2{font-family:'Fredoka One',cursive;font-size:2rem;margin-bottom:6px;color:var(--gold);text-shadow:0 0 20px rgba(255,212,71,.5)}
+.lvup-card p{color:var(--muted2);font-size:.9rem}
+
+/* TOAST */
+#toast{position:fixed;bottom:60px;left:50%;transform:translateX(-50%) translateY(30px);background:var(--surface2);border:1px solid var(--border2);border-radius:50px;padding:10px 20px;font-size:.84rem;font-weight:700;color:var(--text);z-index:400;pointer-events:none;white-space:nowrap;transition:transform .28s ease,opacity .28s ease;opacity:0;box-shadow:0 8px 32px rgba(0,0,0,.5)}
+#toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--surface3);border-radius:2px}
+
+@media(max-width:700px){
+  .wrap{padding:0 14px 90px}
+  header{padding-top:18px}
+  .logo-words h1{font-size:1.5rem}
+  .stats-row{grid-template-columns:1fr 1fr;gap:10px}
+  .portals{grid-template-columns:1fr}
+  .bottom-grid{grid-template-columns:1fr}
+  .cat-bar-lbl{width:100px;font-size:.64rem}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- HEADER -->
+<header>
+  <div class="logo">
+    <div class="logo-gem">⚡</div>
+    <div class="logo-words">
+      <h1>FocusForge</h1>
+      <p>Brain Training Platform</p>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="player-chip">
+      <div class="player-avatar" id="p-av" onclick="openName()" title="Edit profile">🧠</div>
+      <div>
+        <div class="player-name" id="p-name" onclick="openName()">Set Your Name</div>
+        <div class="player-level-lbl" id="p-lv">Level 1 — Spark</div>
+      </div>
+    </div>
+    <button class="btn-ta" onclick="openTA()"><div class="ta-dot"></div>Teaching Assistant</button>
+  </div>
+</header>
+
+<!-- XP BAR -->
+<div class="xp-wrap">
+  <div class="xp-head">
+    <div class="xp-lv-label"><span id="xp-name">Spark</span><span class="lv-badge" id="xp-lv">LV 1</span></div>
+    <span class="xp-next-lbl" id="xp-next">0 / 150 XP</span>
+  </div>
+  <div class="xp-track"><div class="xp-fill" id="xp-fill" style="width:0%"></div></div>
+</div>
+
+<!-- STATS -->
+<div class="stats-row">
+  <div class="stat-card s1"><div class="sc-num" id="s-xp">0</div><div class="sc-label">Total XP</div></div>
+  <div class="stat-card s2"><div class="sc-num" id="s-streak">0</div><div class="sc-label">Day Streak 🔥</div></div>
+  <div class="stat-card s3"><div class="sc-num" id="s-done">0</div><div class="sc-label">Activities Done</div></div>
+  <div class="stat-card s4"><div class="sc-num" id="s-sess">0</div><div class="sc-label">Sessions Played</div></div>
+</div>
+
+<!-- PORTALS -->
+<div class="portals">
+  <a class="portal portal-daily" href="daily.html">
+    <div class="streak-pill" id="streak-pill">🔥 <span id="streak-n">0</span> day streak</div>
+    <span class="portal-icon">📋</span>
+    <div class="portal-lbl">Today's Challenge</div>
+    <div class="portal-title">Daily Mission</div>
+    <div class="portal-desc">3 fresh activities every day. Real-world tasks — writing, thinking, doing. Parents can join in. Same mission all day.</div>
+    <div class="portal-cta">Start Today's Mission →</div>
+  </a>
+  <a class="portal portal-game" href="game.html">
+    <span class="portal-icon">🎮</span>
+    <div class="portal-lbl">Interactive Training</div>
+    <div class="portal-title">Training Game</div>
+    <div class="portal-desc">Timed challenges. Randomised questions every session. Multiple choice. XP rewards. Boss rounds unlock at Level 5.</div>
+    <div class="portal-cta">Launch Training →</div>
+  </a>
+</div>
+
+<!-- BOTTOM GRID -->
+<div class="bottom-grid">
+  <!-- Badges -->
+  <div class="panel">
+    <div class="panel-head">
+      <div class="panel-title">🏅 Badges</div>
+      <div class="panel-count" id="badge-count">0 / 15</div>
+    </div>
+    <div class="badge-grid" id="badge-grid"></div>
+  </div>
+  <!-- Activity Feed -->
+  <div class="panel">
+    <div class="panel-head">
+      <div class="panel-title">⚡ Recent Activity</div>
+    </div>
+    <div class="activity-list" id="act-list"></div>
+  </div>
+</div>
+
+<!-- CATEGORY PROGRESS -->
+<div class="panel cat-progress">
+  <div class="panel-head">
+    <div class="panel-title">📊 Category Progress</div>
+    <div class="panel-count" id="cat-count">0 / 7 categories</div>
+  </div>
+  <div class="cat-bars" id="cat-bars"></div>
+</div>
+
+</div><!-- /wrap -->
+
+<footer class="site-footer">
+  <button class="btn-parent" onclick="openParent()">Parent View</button>
+</footer>
+
+<!-- PARENT PANEL -->
+<div class="overlay" id="ov-parent" onclick="ovBg(event,'ov-parent')">
+  <div class="parent-panel">
+    <div class="drag-bar"></div>
+    <h2>👨‍👩‍👧 Parent View</h2>
+    <p class="pp-sub">Session history and data management. Nothing leaves this device unless you download it.</p>
+    <div class="ret-row">
+      <span class="ret-lbl">Age group</span>
+      <span class="ret-chip" id="ag-both" onclick="setAge('both')">All Ages</span>
+      <span class="ret-chip" id="ag-youth" onclick="setAge('youth')">🧒 Youth</span>
+      <span class="ret-chip" id="ag-adult" onclick="setAge('adult')">🧑 Adult</span>
+    </div>
+    <div class="ret-row">
+      <span class="ret-lbl">Keep data for</span>
+      <span class="ret-chip" data-d="7">7 days</span>
+      <span class="ret-chip" data-d="14">14 days</span>
+      <span class="ret-chip" data-d="30">30 days</span>
+      <span class="ret-chip" data-d="999">Keep all</span>
+    </div>
+    <div id="hist-wrap"></div>
+    <div class="pp-actions">
+      <button class="pp-btn dl" onclick="dlReport()">⬇ Progress Report TSV</button>
+      <button class="pp-btn dl" onclick="dlDetail()">⬇ Session Detail TSV</button>
+      <button class="pp-btn wipe" onclick="askWipe()">🗑 Wipe All Data</button>
+      <button class="pp-btn cls" onclick="closeOv('ov-parent')">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- NAME MODAL -->
+<div class="overlay center" id="ov-name" onclick="ovBg(event,'ov-name')">
+  <div class="modal-box">
+    <h3>Your Profile</h3>
+    <p class="sub">Set your name and pick an avatar</p>
+    <input class="name-input" id="name-in" type="text" maxlength="20" placeholder="Enter your name…"/>
+    <div class="av-row" id="av-row"></div>
+    <button class="btn-primary" onclick="saveName()">Save Profile</button>
+  </div>
+</div>
+
+<!-- TA MODAL -->
+<div class="overlay center" id="ov-ta" onclick="ovBg(event,'ov-ta')">
+  <div class="ta-modal">
+    <div class="ta-orb">🤖</div>
+    <h3>Teaching Assistant</h3>
+    <p>Paste your project or assistant link. Opens in a new tab ready to help with any activity.</p>
+    <input class="ta-input" id="ta-in" type="url" placeholder="https://…"/>
+    <button class="btn-primary" onclick="connectTA()">Connect &amp; Open →</button>
+    <button class="btn-ghost" onclick="closeOv('ov-ta')">Cancel</button>
+  </div>
+</div>
+
+<!-- CONFIRM WIPE -->
+<div class="overlay center" id="ov-confirm" onclick="ovBg(event,'ov-confirm')">
+  <div class="confirm-modal">
+    <div class="warn">⚠️</div>
+    <h3>Wipe All Data?</h3>
+    <p>Deletes all XP, badges, progress and history. Cannot be undone.</p>
+    <div class="confirm-btns">
+      <button class="btn-yes" onclick="doWipe()">Yes, Wipe</button>
+      <button class="btn-no" onclick="closeOv('ov-confirm')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- LEVEL UP BURST -->
+<div class="lvup-burst" id="lvup-burst">
+  <div class="lvup-card">
+    <span class="lvup-icon">🚀</span>
+    <h2 id="lu-h">Level Up!</h2>
+    <p id="lu-p">You reached Level 2</p>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+/* ── CONSTANTS ───────────────────────────────── */
+const LEVELS=[
+  {n:1,name:'Spark',xp:0},{n:2,name:'Igniter',xp:150},
+  {n:3,name:'Focuser',xp:400},{n:4,name:'Sharpener',xp:750},
+  {n:5,name:'Challenger',xp:1200},{n:6,name:'Forger',xp:1800},
+  {n:7,name:'Master Forger',xp:2600},{n:8,name:'Brain Titan',xp:3600}
+];
+const BADGES=[
+  {id:'badge_first',  e:'⚡',n:'First Spark',   c:'#ffd447',t:'Complete your first activity'},
+  {id:'badge_3str',   e:'🔥',n:'On a Roll',     c:'#ff9a3c',t:'3-day streak'},
+  {id:'badge_7str',   e:'🌟',n:'Week Warrior',   c:'#ffd447',t:'7-day streak'},
+  {id:'badge_ef',     e:'🧠',n:'Mind Miner',     c:'#ff5e5e',t:'First Exec Function'},
+  {id:'badge_wm',     e:'💾',n:'Memory Keeper',  c:'#00d4c8',t:'First Working Memory'},
+  {id:'badge_fs',     e:'🎯',n:'Laser Focus',    c:'#ffcc00',t:'First Focus Stamina'},
+  {id:'badge_im',     e:'🛑',n:'Pause Master',   c:'#4cd97b',t:'First Impulse card'},
+  {id:'badge_er',     e:'💛',n:'Emotion Expert', c:'#ff7eb3',t:'First Emotional Reg'},
+  {id:'badge_rw',     e:'🌍',n:'Life Forge',     c:'#4da6ff',t:'First Real-World card'},
+  {id:'badge_tp',     e:'📋',n:'Blueprint Pro',  c:'#a278ff',t:'First Tech Planning'},
+  {id:'badge_allcats',e:'🏆',n:'All 7 Cats',    c:'#ffd447',t:'All 7 category badges'},
+  {id:'badge_boss',   e:'👹',n:'Boss Slayer',    c:'#ff5e7d',t:'Complete a Boss Round'},
+  {id:'badge_99',     e:'💎',n:'Full Deck',      c:'#9b6dff',t:'All 99 reference cards done'},
+  {id:'badge_speed',  e:'⚡',n:'Speed Demon',    c:'#00e5cc',t:'5 correct answers under 5s'},
+  {id:'badge_nohint', e:'🧩',n:'Hint-Free',      c:'#5cff8f',t:'Full game with 0 hints'},
+];
+const CATS=[
+  {k:'Executive Function',    i:'🧠',c:'#ff5e5e'},
+  {k:'Working Memory',        i:'💾',c:'#00d4c8'},
+  {k:'Focus Stamina',         i:'🎯',c:'#ffcc00'},
+  {k:'Impulse Management',    i:'🛑',c:'#4cd97b'},
+  {k:'Emotional Regulation',  i:'💛',c:'#ff7eb3'},
+  {k:'Real-World Application',i:'🌍',c:'#4da6ff'},
+  {k:'Technical Planning',    i:'📋',c:'#a278ff'},
+];
+const AVATARS=['🧠','🦊','🐺','🦅','🐉','🦁','🤖','🧙','🦸','⚡'];
+
+/* ── STATE ───────────────────────────────────── */
+const ld=(k,d)=>{try{return JSON.parse(localStorage.getItem('ff_'+k))??d}catch{return d}};
+const sv=(k,v)=>localStorage.setItem('ff_'+k,JSON.stringify(v));
+
+let xp=ld('xp',0),streak=ld('streak',0),lastDate=ld('lastDate','');
+let sessions=ld('sessions',0),doneCards=ld('doneCards',{});
+let doneCats=ld('doneCats',{}),badges=ld('badges',{});
+let history=ld('history',[]),retention=ld('retention',30);
+let pName=ld('pName',''),pAv=ld('pAv','🧠'),selAv=pAv;
+
+/* ── BOOT ────────────────────────────────────── */
+window.addEventListener('DOMContentLoaded',()=>{
+  pruneHistory();
+  renderAll();
+  checkBadges();
+  initAgeChips();
+  checkFirstRun();
+});
+
+function renderAll(){
+  renderProfile(); renderXP(); renderStats();
+  renderStreak(); renderBadges(); renderFeed(); renderCats();
+  renderRetChips();
+}
+
+/* ── PROFILE ─────────────────────────────────── */
+function renderProfile(){
+  document.getElementById('p-name').textContent=pName||'Set Your Name';
+  document.getElementById('p-av').textContent=pAv;
+  const lv=getLv(xp);
+  document.getElementById('p-lv').textContent=`Level ${lv.n} — ${lv.name}`;
+}
+
+/* ── XP ──────────────────────────────────────── */
+function getLv(v){let l=LEVELS[0];for(const x of LEVELS){if(v>=x.xp)l=x;else break}return l}
+function getNextLv(v){for(const x of LEVELS)if(x.xp>v)return x;return null}
+function renderXP(){
+  const lv=getLv(xp),nx=getNextLv(xp);
+  const pct=nx?Math.round(((xp-lv.xp)/(nx.xp-lv.xp))*100):100;
+  document.getElementById('xp-name').textContent=lv.name;
+  document.getElementById('xp-lv').textContent='LV '+lv.n;
+  document.getElementById('xp-next').textContent=nx?`${xp} / ${nx.xp} XP`:`${xp} XP — MAX`;
+  document.getElementById('p-lv').textContent=`Level ${lv.n} — ${lv.name}`;
+  setTimeout(()=>{document.getElementById('xp-fill').style.width=pct+'%'},300);
+}
+
+/* ── STATS ───────────────────────────────────── */
+function renderStats(){
+  count('s-xp',xp);count('s-streak',streak);
+  count('s-done',Object.keys(doneCards).length);count('s-sess',sessions);
+}
+function renderStreak(){
+  const p=document.getElementById('streak-pill');
+  if(streak>=2){p.style.display='block';document.getElementById('streak-n').textContent=streak}
+}
+
+/* ── BADGES ──────────────────────────────────── */
+function renderBadges(){
+  const g=document.getElementById('badge-grid');
+  const earned=Object.keys(badges).filter(k=>badges[k]).length;
+  document.getElementById('badge-count').textContent=`${earned} / ${BADGES.length}`;
+  g.innerHTML=BADGES.map(b=>{
+    const on=!!badges[b.id];
+    return`<div class="badge-item${on?' earned':''}"${on?` style="--bc:${b.c}"`:''} data-tip="${b.t}">
+      <span class="badge-emoji">${b.e}</span>
+      <span class="badge-name">${b.n}</span>
+    </div>`;
+  }).join('');
+}
+function unlock(id){
+  if(badges[id])return;
+  badges[id]=Date.now();sv('badges',badges);renderBadges();
+  const b=BADGES.find(x=>x.id===id);
+  if(b)toast(`🏅 Badge unlocked: ${b.n}!`);
+}
+function checkBadges(){
+  const dc=Object.keys(doneCards).length;
+  if(dc>=1)unlock('badge_first');
+  if(streak>=3)unlock('badge_3str');
+  if(streak>=7)unlock('badge_7str');
+  if(dc>=99)unlock('badge_99');
+  const cmap={'Executive Function':'badge_ef','Working Memory':'badge_wm','Focus Stamina':'badge_fs',
+    'Impulse Management':'badge_im','Emotional Regulation':'badge_er',
+    'Real-World Application':'badge_rw','Technical Planning':'badge_tp'};
+  Object.entries(cmap).forEach(([cat,bid])=>{if(doneCats[cat])unlock(bid)});
+  if(Object.keys(cmap).every(cat=>!!doneCats[cat]))unlock('badge_allcats');
+}
+
+/* ── FEED ────────────────────────────────────── */
+function renderFeed(){
+  const el=document.getElementById('act-list');
+  const recent=[...history].reverse().slice(0,6);
+  if(!recent.length){
+    el.innerHTML=`<div class="empty-feed"><span class="ef-icon">🔭</span>No sessions yet — start with a Daily Mission or Training Game above!</div>`;
+    return;
+  }
+  const mc={'daily':'#9b6dff','game':'#00e5cc'};
+  const mi={'daily':'📋','game':'🎮'};
+  el.innerHTML=recent.map(s=>`
+    <div class="activity-item" style="--ac:${mc[s.mode]||'#9b6dff'}">
+      <div class="act-icon">${mi[s.mode]||'⚡'}</div>
+      <div class="act-body">
+        <div class="act-title">${s.label||(s.mode==='daily'?'Daily Mission':'Training Session')}</div>
+        <div class="act-sub">${fmtDate(s.ts)}${s.cat?' · '+s.cat:''}</div>
+      </div>
+      <div class="act-xp">+${s.xp} XP</div>
+    </div>`).join('');
+}
+
+/* ── CAT PROGRESS ────────────────────────────── */
+function renderCats(){
+  const active=CATS.filter(c=>doneCats[c.k]).length;
+  document.getElementById('cat-count').textContent=`${active} / 7 categories started`;
+  document.getElementById('cat-bars').innerHTML=CATS.map(c=>{
+    const n=doneCats[c.k]||0,pct=Math.min(Math.round((n/14)*100),100);
+    const short=c.k.replace(' Application','').replace(' Management','')
+      .replace(' Regulation','').replace(' Function','').replace(' Stamina','');
+    return`<div class="cat-bar-row">
+      <div class="cat-bar-lbl" style="color:${c.c}"><span>${c.i}</span>${short}</div>
+      <div class="cat-bar-track"><div class="cat-bar-fill" style="--bc:${c.c};width:${pct}%"></div></div>
+      <div class="cat-bar-pct">${pct}%</div>
+    </div>`;
+  }).join('');
+}
+
+/* ── PARENT ──────────────────────────────────── */
+function openParent(){buildHistory();document.getElementById('ov-parent').classList.add('open')}
+function buildHistory(){
+  const w=document.getElementById('hist-wrap');
+  if(!history.length){w.innerHTML=`<div class="no-hist">No session history yet.</div>`;return}
+  const rows=[...history].reverse().slice(0,20).map(s=>`
+    <tr><td>${fmtDate(s.ts)}</td>
+    <td><span class="mode-pill mode-${s.mode}">${s.mode==='daily'?'Daily':'Game'}</span></td>
+    <td>${s.cat||'—'}</td>
+    <td style="color:var(--gold);font-weight:700">+${s.xp}</td>
+    <td>${s.score||'—'}</td></tr>`).join('');
+  w.innerHTML=`<table class="history-table">
+    <thead><tr><th>Date</th><th>Mode</th><th>Category</th><th>XP</th><th>Score</th></tr></thead>
+    <tbody>${rows}</tbody></table>`;
+}
+function renderRetChips(){
+  document.querySelectorAll('.ret-chip').forEach(c=>{
+    c.classList.toggle('on',parseInt(c.dataset.d)===retention);
+    c.onclick=()=>{
+      retention=parseInt(c.dataset.d);sv('retention',retention);
+      document.querySelectorAll('.ret-chip').forEach(x=>x.classList.remove('on'));
+      c.classList.add('on');pruneHistory();
+    };
+  });
+}
+function pruneHistory(){
+  if(retention===999)return;
+  const cut=Date.now()-(retention*86400000);
+  const before=history.length;
+  history=history.filter(s=>s.ts>cut);
+  if(history.length!==before)sv('history',history);
+}
+
+/* ── DOWNLOADS ───────────────────────────────── */
+function dlReport(){
+  const hdr='date\tmode\tcategory\txp_earned\tscore\tlevel_at_session';
+  const rows=history.map(s=>`${fmtDate(s.ts)}\t${s.mode}\t${s.cat||''}\t${s.xp}\t${s.score||''}\t${s.level||1}`);
+  dlTSV([hdr,...rows].join('\n'),'focusforge_progress_report.tsv');
+  toast('📥 Report downloaded!');
+}
+function dlDetail(){
+  const hdr='date\tsession_id\tmode\tcategory\tcard_id\txp_earned\tscore';
+  const rows=history.map((s,i)=>`${fmtDate(s.ts)}\t${i+1}\t${s.mode}\t${s.cat||''}\t${s.cardId||''}\t${s.xp}\t${s.score||''}`);
+  dlTSV([hdr,...rows].join('\n'),'focusforge_session_detail.tsv');
+  toast('📥 Detail downloaded!');
+}
+function dlTSV(content,fname){
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([content],{type:'text/tab-separated-values'}));
+  a.download=fname;a.click();
+}
+
+/* ── WIPE ────────────────────────────────────── */
+function askWipe(){closeOv('ov-parent');document.getElementById('ov-confirm').classList.add('open')}
+function doWipe(){
+  xp=0;streak=0;lastDate='';sessions=0;doneCards={};doneCats={};badges={};history=[];
+  ['xp','streak','lastDate','sessions','doneCards','doneCats','badges','history'].forEach(k=>localStorage.removeItem('ff_'+k));
+  closeOv('ov-confirm');renderAll();toast('All data wiped.');
+}
+
+/* ── NAME ────────────────────────────────────── */
+function openName(){
+  document.getElementById('name-in').value=pName;selAv=pAv;
+  document.getElementById('av-row').innerHTML=AVATARS.map(a=>
+    `<div class="av-opt${a===pAv?' on':''}" onclick="pickAv(this,'${a}')">${a}</div>`).join('');
+  document.getElementById('ov-name').classList.add('open');
+}
+function pickAv(el,av){
+  selAv=av;
+  document.querySelectorAll('.av-opt').forEach(x=>x.classList.remove('on'));
+  el.classList.add('on');
+}
+function saveName(){
+  const v=document.getElementById('name-in').value.trim();
+  if(v){pName=v;sv('pName',pName)}
+  pAv=selAv;sv('pAv',pAv);
+  closeOv('ov-name');renderProfile();toast('Profile saved! 👋');
+}
+
+/* ── TA ──────────────────────────────────────── */
+function openTA(){document.getElementById('ta-in').value=localStorage.getItem('ff_ta_link')||'https://claude.ai/project/019c8725-05d6-7317-bd77-475bce4be335';document.getElementById('ov-ta').classList.add('open')}
+function connectTA(){
+  const v=document.getElementById('ta-in').value.trim();
+  if(!v){document.getElementById('ta-in').focus();return}
+  localStorage.setItem('ff_ta_link',v);
+  window.open(v,'_blank');closeOv('ov-ta');toast('🤖 Teaching Assistant connected!');
+}
+
+/* ── OVERLAYS ────────────────────────────────── */
+function closeOv(id){document.getElementById(id).classList.remove('open')}
+function ovBg(e,id){if(e.target===document.getElementById(id))closeOv(id)}
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape')['ov-parent','ov-name','ov-ta','ov-confirm'].forEach(closeOv);
+});
+
+function setAge(g){
+  sv('ageGroup',g);
+  ['both','youth','adult'].forEach(x=>document.getElementById('ag-'+x)?.classList.remove('on'));
+  document.getElementById('ag-'+g)?.classList.add('on');
+  toast('Age group set to: '+{both:'All Ages',youth:'Youth',adult:'Adult'}[g]);
+}
+function initAgeChips(){
+  const g=ld('ageGroup','both');
+  ['both','youth','adult'].forEach(x=>document.getElementById('ag-'+x)?.classList.remove('on'));
+  document.getElementById('ag-'+g)?.classList.add('on');
+}
+
+/* ── FIRST-RUN ONBOARDING ──────────────────── */
+function checkFirstRun(){
+  if(ld('onboarded',false))return;
+  document.getElementById('ov-onboard').classList.add('open');
+}
+function completeOnboard(){
+  const n=document.getElementById('ob-name').value.trim();
+  if(n){pName=n;sv('pName',pName)}
+  pAv=selObAv||'🧠';sv('pAv',pAv);
+  const ag=document.querySelector('.ob-age.on')?.dataset.ag||'both';
+  sv('ageGroup',ag);
+  sv('onboarded',true);
+  closeOv('ov-onboard');
+  renderProfile();
+  toast('Welcome to FocusForge, '+(pName||'Explorer')+'! 🚀');
+}
+let selObAv='🧠';
+function pickObAv(el,av){
+  selObAv=av;
+  document.querySelectorAll('.ob-av').forEach(x=>x.classList.remove('on'));
+  el.classList.add('on');
+}
+
+/* ── UTILS ───────────────────────────────────── */
+function count(id,target){
+  const el=document.getElementById(id);if(!el)return;
+  const start=parseInt(el.textContent)||0;if(start===target)return;
+  const diff=target-start,steps=30;let i=0;
+  const t=setInterval(()=>{i++;el.textContent=Math.round(start+diff*(i/steps));if(i>=steps){el.textContent=target;clearInterval(t)}},25);
+}
+let toastT;
+function toast(msg){
+  const el=document.getElementById('toast');
+  el.textContent=msg;el.classList.add('show');
+  clearTimeout(toastT);toastT=setTimeout(()=>el.classList.remove('show'),3200);
+}
+function fmtDate(ts){
+  if(!ts)return'—';
+  return new Date(ts).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
+}
+function showLvUp(lv){
+  document.getElementById('lu-h').textContent='Level Up! 🎉';
+  document.getElementById('lu-p').textContent=`You reached Level ${lv.n}: ${lv.name}`;
+  const b=document.getElementById('lvup-burst');b.classList.add('show');
+  setTimeout(()=>b.classList.remove('show'),3200);
+}
+
+/* ── EXPORTED API — called by daily.html & game.html ── */
+window.FF={
+  awardXP(amt,mode,label,cat,cardId,score){
+    const prevLv=getLv(xp);
+    xp+=amt;sv('xp',xp);
+    sessions++;sv('sessions',sessions);
+    const today=new Date().toDateString();
+    if(lastDate!==today){
+      const yest=new Date(Date.now()-86400000).toDateString();
+      streak=(lastDate===yest)?streak+1:1;
+      lastDate=today;sv('streak',streak);sv('lastDate',lastDate);
+    }
+    if(cat){doneCats[cat]=(doneCats[cat]||0)+1;sv('doneCats',doneCats)}
+    if(cardId){doneCards[cardId]=Date.now();sv('doneCards',doneCards)}
+    history.push({ts:Date.now(),mode,label,cat,cardId,xp:amt,score,level:getLv(xp).n});
+    sv('history',history);
+    const newLv=getLv(xp);
+    if(newLv.n>prevLv.n)showLvUp(newLv);
+    checkBadges();renderAll();
+  }
+};
+
+
+/* build onboard avatar row */
+document.addEventListener('DOMContentLoaded',()=>{
+  const r=document.getElementById('ob-av-row');
+  if(r)r.innerHTML=AVATARS.map(a=>`<div class="av-opt ob-av${a==='🧠'?' on':''}" onclick="pickObAv(this,'${a}')">${a}</div>`).join('');
+});
+</script>
+
+<!-- FIRST-RUN ONBOARDING -->
+<div class="overlay center" id="ov-onboard">
+  <div class="modal-box" style="max-width:420px">
+    <div style="font-size:2.8rem;margin-bottom:10px">⚡</div>
+    <h3>Welcome to FocusForge</h3>
+    <p class="sub">Brain training for focus, planning, memory and resilience. Let's set you up in 30 seconds.</p>
+    <input class="name-input" id="ob-name" type="text" maxlength="20" placeholder="What's your name?"/>
+    <div class="av-row" id="ob-av-row" style="margin-bottom:16px"></div>
+    <div style="margin-bottom:18px">
+      <div style="font-size:.7rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);font-weight:700;margin-bottom:10px;text-align:left">Who is training?</div>
+      <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
+        <div class="ret-chip ob-age on" data-ag="both" onclick="document.querySelectorAll('.ob-age').forEach(x=>x.classList.remove('on'));this.classList.add('on')">All Ages</div>
+        <div class="ret-chip ob-age" data-ag="youth" onclick="document.querySelectorAll('.ob-age').forEach(x=>x.classList.remove('on'));this.classList.add('on')">🧒 Youth</div>
+        <div class="ret-chip ob-age" data-ag="adult" onclick="document.querySelectorAll('.ob-age').forEach(x=>x.classList.remove('on'));this.classList.add('on')">🧑 Adult</div>
+      </div>
+    </div>
+    <button class="btn-primary" onclick="completeOnboard()">Let's Go →</button>
+  </div>
+</div>
+
+</body>
+</html>
