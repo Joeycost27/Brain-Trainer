@@ -1,0 +1,1004 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Brain Gym 🧠</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --sky:#eef6ff; --sky2:#daeeff; --white:#fff;
+  --text:#1a2740; --muted:#6b7fa0; --border:rgba(26,39,64,.09);
+  --blue:#3b82f6; --green:#16a34a; --yellow:#d97706;
+  --purple:#7c3aed; --orange:#ea580c; --red:#dc2626; --teal:#0d9488;
+  --pink:#db2777;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Nunito',sans-serif;background:var(--sky);color:var(--text);min-height:100vh}
+button{font-family:'Nunito',sans-serif;cursor:pointer;border:none}
+
+body::before{
+  content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:
+    radial-gradient(circle at 10% 15%,rgba(59,130,246,.1) 0%,transparent 35%),
+    radial-gradient(circle at 88% 80%,rgba(124,58,237,.08) 0%,transparent 35%),
+    radial-gradient(rgba(26,39,64,.03) 1px,transparent 1px);
+  background-size:100% 100%,100% 100%,24px 24px;
+}
+
+.wrap{
+  position:relative;z-index:1;
+  max-width:600px;margin:0 auto;
+  padding:0 16px 80px;
+  min-height:100vh;
+  display:flex;flex-direction:column;
+}
+
+/* ─── NAV ─────────────────────────────────── */
+nav{display:flex;align-items:center;justify-content:space-between;padding:18px 0 20px}
+.back{display:flex;align-items:center;gap:5px;color:var(--muted);font-size:.82rem;font-weight:800;text-decoration:none;background:var(--white);border:2px solid var(--border);border-radius:50px;padding:7px 14px;transition:all .15s}
+.back:hover{border-color:var(--blue);color:var(--blue)}
+.brand{font-family:'Baloo 2',cursive;font-size:1.1rem;font-weight:800;color:var(--blue)}
+.sage-btn{display:flex;align-items:center;gap:6px;background:var(--white);border:2px solid rgba(124,58,237,.3);border-radius:50px;padding:7px 14px;color:var(--purple);font-size:.78rem;font-weight:800;transition:all .15s}
+.sage-btn:hover{background:rgba(124,58,237,.06);border-color:var(--purple)}
+.sdot{width:7px;height:7px;border-radius:50%;background:#16a34a;box-shadow:0 0 5px #16a34a;animation:blink 2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* ─── PICK SCREEN ──────────────────────────── */
+#s-pick{flex:1;display:flex;flex-direction:column;align-items:center;padding-top:4px}
+.hero{text-align:center;margin-bottom:24px}
+.hero-badge{display:inline-block;background:rgba(59,130,246,.1);border:2px solid rgba(59,130,246,.2);border-radius:50px;padding:5px 14px;font-size:.7rem;font-weight:800;color:var(--blue);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:10px}
+.hero h2{font-family:'Baloo 2',cursive;font-size:2.1rem;font-weight:800;line-height:1.2;margin-bottom:6px}
+.hero p{font-size:.87rem;color:var(--muted);line-height:1.6;font-weight:700;max-width:340px;margin:0 auto}
+
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%;margin-bottom:16px}
+.tile{background:var(--white);border:3px solid var(--border);border-radius:22px;padding:18px 14px 14px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden;text-align:left}
+.tile::before{content:'';position:absolute;top:0;left:0;right:0;height:5px;background:var(--tc,var(--blue));border-radius:2px 2px 0 0}
+.tile:hover{border-color:var(--tc,var(--blue));transform:translateY(-4px);box-shadow:0 8px 22px color-mix(in srgb,var(--tc,var(--blue)) 16%,transparent)}
+.tile.off{opacity:.45;cursor:not-allowed;pointer-events:none}
+.ti{font-size:2.2rem;display:block;margin-bottom:8px}
+.tn{font-family:'Baloo 2',cursive;font-size:1rem;font-weight:800;margin-bottom:3px}
+.td{font-size:.74rem;color:var(--muted);line-height:1.45;font-weight:700}
+.tlock{position:absolute;top:9px;right:9px;font-size:.64rem;font-weight:800;background:var(--sky2);border-radius:50px;padding:2px 8px;color:var(--muted)}
+
+.cat-box{display:none;width:100%;background:var(--white);border:2px solid var(--border);border-radius:20px;padding:14px;margin-bottom:8px}
+.cat-box label{display:block;font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);margin-bottom:9px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{padding:6px 13px;border-radius:50px;font-size:.76rem;font-weight:800;border:2px solid transparent;background:var(--sky2);color:var(--muted);cursor:pointer;transition:all .15s}
+.chip.on{color:#fff}
+
+/* ─── LOADING ──────────────────────────────── */
+#s-load{flex:1;display:none;flex-direction:column;align-items:center;justify-content:center;gap:14px}
+.ring{width:48px;height:48px;border-radius:50%;border:4px solid var(--sky2);border-top-color:var(--blue);animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ─── GAME SCREEN ──────────────────────────── */
+#s-game{flex:1;display:none;flex-direction:column}
+
+/* Progress stars across the top */
+.progress{display:flex;justify-content:center;gap:10px;margin-bottom:18px}
+.pip{font-size:1.5rem;transition:all .35s;filter:grayscale(1);opacity:.18;transform:scale(.78)}
+.pip.active{filter:none;opacity:.45;transform:scale(.88)}
+.pip.done{filter:none;opacity:1;transform:scale(1);animation:pop .4s cubic-bezier(.34,1.56,.64,1) both}
+@keyframes pop{0%{transform:scale(.3) rotate(-25deg)}70%{transform:scale(1.3) rotate(8deg)}100%{transform:scale(1) rotate(0)}}
+
+/* Top bar */
+.bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px}
+.qnum{font-family:'Baloo 2',cursive;font-size:.95rem;font-weight:800;color:var(--muted)}
+.stars-badge{display:flex;align-items:center;gap:5px;background:var(--white);border:2px solid rgba(217,119,6,.3);border-radius:50px;padding:5px 13px}
+.stars-badge span{font-family:'Baloo 2',cursive;font-size:.9rem;font-weight:800;color:var(--yellow)}
+.stars-badge span.bump{animation:bump .3s ease}
+@keyframes bump{50%{transform:scale(1.5)}}
+.fire{display:none;align-items:center;gap:4px;background:rgba(234,88,12,.08);border:2px solid rgba(234,88,12,.2);border-radius:50px;padding:5px 11px;font-size:.74rem;font-weight:800;color:var(--orange)}
+.fire.on{display:flex}
+
+/* Question card */
+.qcard{background:var(--white);border:3px solid var(--border);border-radius:24px;padding:20px 18px;margin-bottom:12px;position:relative;overflow:hidden}
+.qcard::before{content:'';position:absolute;top:0;left:0;right:0;height:6px;background:var(--cc,var(--blue));border-radius:2px 2px 0 0}
+.qcard-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.qcat{display:flex;align-items:center;gap:7px}
+.qcat-ico{width:30px;height:30px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:.9rem}
+.qcat-name{font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:1px}
+.qdots{display:flex;gap:4px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--sky2)}
+.dot.on{background:var(--cc,var(--blue))}
+
+.qtext{font-family:'Baloo 2',cursive;font-size:1.1rem;font-weight:700;line-height:1.6;color:var(--text)}
+
+/* Data box for injected values */
+.qdata{display:none;margin-top:12px;background:var(--sky);border:2px dashed rgba(26,39,64,.12);border-radius:12px;padding:10px 14px;text-align:center}
+.qdata-lbl{font-size:.62rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);font-weight:800;margin-bottom:5px}
+.qdata-val{font-family:'Baloo 2',cursive;font-size:1.05rem;font-weight:800;color:var(--text);letter-spacing:.5px}
+
+/* Hint */
+.hint-wrap{margin-bottom:10px}
+.hint-btn{width:100%;padding:10px;background:rgba(217,119,6,.07);border:2px dashed rgba(217,119,6,.35);border-radius:13px;color:#92400e;font-size:.82rem;font-weight:800;transition:all .15s}
+.hint-btn:hover:not([disabled]){background:rgba(217,119,6,.14);border-style:solid}
+.hint-btn[disabled]{opacity:.3;cursor:not-allowed}
+.hint-reveal{display:none;padding:10px 14px;background:rgba(217,119,6,.07);border:2px solid rgba(217,119,6,.25);border-radius:13px;font-size:.82rem;color:#92400e;font-weight:700;line-height:1.5}
+
+/* Options — vertical, one column, big tap targets */
+.opts{display:flex;flex-direction:column;gap:9px;margin-bottom:12px}
+.opt{
+  width:100%;padding:15px 16px;
+  background:var(--white);border:3px solid var(--border);
+  border-radius:16px;
+  font-size:.94rem;font-weight:800;color:var(--text);
+  text-align:left;display:flex;align-items:center;gap:12px;
+  transition:border-color .15s,background .15s,transform .15s;
+  cursor:pointer;
+}
+.opt:hover:not([disabled]){border-color:var(--blue);transform:translateX(4px)}
+.ltr{
+  width:28px;height:28px;border-radius:8px;flex-shrink:0;
+  background:var(--sky2);display:flex;align-items:center;justify-content:center;
+  font-family:'Baloo 2',cursive;font-size:.75rem;font-weight:800;color:var(--muted);
+  transition:all .2s;pointer-events:none;
+}
+.opt-txt{pointer-events:none;flex:1;line-height:1.4}
+.opt[disabled]{cursor:default;transform:none}
+.opt.correct{border-color:var(--green);background:rgba(22,163,74,.07);color:var(--green);animation:slam .25s cubic-bezier(.34,1.56,.64,1)}
+@keyframes slam{from{transform:scale(.97)}to{transform:scale(1)}}
+.opt.correct .ltr{background:var(--green);color:#fff}
+.opt.wrong{border-color:var(--red);background:rgba(220,38,38,.06);color:var(--red)}
+.opt.wrong .ltr{background:var(--red);color:#fff}
+.opt.show-right{border-color:rgba(22,163,74,.4);background:rgba(22,163,74,.04);color:var(--green)}
+.opt.show-right .ltr{background:rgba(22,163,74,.18);color:var(--green)}
+
+/* Feedback */
+.fb{display:none;border-radius:16px;padding:14px 16px;margin-bottom:10px;font-size:.88rem;font-weight:700;line-height:1.55}
+.fb.good{background:rgba(22,163,74,.07);border:2px solid rgba(22,163,74,.2);color:var(--green)}
+.fb.bad{background:rgba(220,38,38,.06);border:2px solid rgba(220,38,38,.18);color:var(--red)}
+
+/* Celebration */
+.cheer{display:none;text-align:center;padding:6px 0 2px;animation:cheer .5s cubic-bezier(.34,1.56,.64,1) both}
+@keyframes cheer{from{opacity:0;transform:scale(.3) rotate(-12deg)}to{opacity:1;transform:scale(1) rotate(0)}}
+.cheer-big{font-family:'Baloo 2',cursive;font-size:2rem;font-weight:800;color:var(--green);display:block;line-height:1.2}
+.cheer-sm{font-size:.8rem;color:var(--muted);font-weight:700}
+
+/* NEXT BUTTON — biggest, most obvious thing on screen after answering */
+.next-btn{
+  display:none;width:100%;padding:18px;
+  background:linear-gradient(135deg,var(--blue),var(--purple));
+  border-radius:18px;
+  color:#fff;font-family:'Baloo 2',cursive;font-size:1.15rem;font-weight:800;
+  box-shadow:0 6px 22px rgba(59,130,246,.35);
+  transition:transform .15s,box-shadow .15s;
+  margin-bottom:12px;
+  animation:rise .3s cubic-bezier(.34,1.56,.64,1) both;
+}
+@keyframes rise{from{opacity:0;transform:translateY(16px) scale(.95)}to{opacity:1;transform:translateY(0) scale(1)}}
+.next-btn:hover{transform:translateY(-3px);box-shadow:0 10px 30px rgba(59,130,246,.45)}
+.next-btn:active{transform:translateY(0)}
+
+/* Sage */
+.sage-box{display:flex;gap:9px;align-items:flex-start;padding:10px 13px;background:rgba(124,58,237,.06);border:2px solid rgba(124,58,237,.15);border-radius:13px}
+.sav{width:27px;height:27px;border-radius:50%;flex-shrink:0;background:linear-gradient(135deg,var(--purple),var(--teal));display:flex;align-items:center;justify-content:center;font-size:.8rem}
+.stxt{font-size:.76rem;color:var(--muted);line-height:1.5;font-weight:700}
+.stxt strong{color:var(--text)}
+.slink{color:var(--purple);font-weight:800;text-decoration:underline;cursor:pointer}
+
+/* ─── WIN SCREEN ───────────────────────────── */
+#s-win{flex:1;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.trophy{font-size:5rem;margin-bottom:10px;animation:spinIn .6s ease both}
+@keyframes spinIn{from{transform:rotate(-20deg) scale(.4);opacity:0}to{transform:rotate(0) scale(1);opacity:1}}
+.wtitle{font-family:'Baloo 2',cursive;font-size:2.2rem;font-weight:800;margin-bottom:6px}
+.wsub{font-size:.88rem;color:var(--muted);font-weight:700;line-height:1.6;max-width:360px;margin:0 auto 24px}
+
+.scores{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;justify-content:center}
+.sc{padding:14px 18px;border-radius:20px;text-align:center;min-width:90px}
+.sc.s{background:rgba(217,119,6,.1);border:2px solid rgba(217,119,6,.3)}
+.sc.r{background:rgba(22,163,74,.08);border:2px solid rgba(22,163,74,.25)}
+.sc.f{background:rgba(234,88,12,.08);border:2px solid rgba(234,88,12,.25)}
+.sn{font-family:'Baloo 2',cursive;font-size:1.9rem;font-weight:800;display:block;line-height:1}
+.sl{font-size:.64rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);margin-top:4px;font-weight:800;display:block}
+.sc.s .sn{color:var(--yellow)}.sc.r .sn{color:var(--green)}.sc.f .sn{color:var(--orange)}
+
+.breakdown{width:100%;max-width:440px;background:var(--white);border:2px solid var(--border);border-radius:20px;padding:14px;margin-bottom:20px;text-align:left}
+.breakdown h4{font-size:.68rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);font-weight:800;margin-bottom:10px}
+.br{display:flex;align-items:center;gap:8px;margin-bottom:7px}
+.br-ico{font-size:.88rem;width:20px;text-align:center;flex-shrink:0}
+.br-nm{font-size:.78rem;font-weight:800;flex:1}
+.br-dots{display:flex;gap:3px}
+.brd{width:9px;height:9px;border-radius:50%;background:var(--sky2)}
+.brd.on{background:var(--green)}
+
+.wbtns{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.wagain{padding:14px 28px;background:linear-gradient(135deg,var(--blue),var(--purple));border-radius:50px;color:#fff;font-family:'Baloo 2',cursive;font-size:1rem;font-weight:800;box-shadow:0 5px 18px rgba(59,130,246,.3);transition:all .2s}
+.wagain:hover{transform:translateY(-3px)}
+.whome{padding:14px 22px;background:var(--white);border:2px solid var(--border);border-radius:50px;color:var(--muted);font-family:'Baloo 2',cursive;font-size:1rem;font-weight:800;transition:all .15s}
+.whome:hover{border-color:var(--blue);color:var(--blue)}
+
+/* ─── TOAST ────────────────────────────────── */
+#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(30px);background:var(--text);border-radius:50px;padding:10px 20px;font-size:.82rem;font-weight:800;color:#fff;z-index:400;pointer-events:none;white-space:nowrap;opacity:0;transition:transform .25s,opacity .25s;box-shadow:0 6px 22px rgba(26,39,64,.2)}
+#toast.on{transform:translateX(-50%) translateY(0);opacity:1}
+
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-thumb{background:var(--sky2);border-radius:2px}
+
+@media(max-width:460px){
+  .grid{grid-template-columns:1fr}
+  .hero h2{font-size:1.8rem}
+  .qtext{font-size:.98rem}
+  .wtitle{font-size:1.8rem}
+  .next-btn{font-size:1rem;padding:16px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <nav>
+    <a class="back" href="index.html">← Home</a>
+    <div class="brand">⚡ Brain Gym</div>
+    <button class="sage-btn" onclick="openSage()"><div class="sdot"></div>Ask Sage</button>
+  </nav>
+
+  <!-- PICK MODE -->
+  <div id="s-pick">
+    <div class="hero">
+      <div class="hero-badge">🧠 Choose Your Training</div>
+      <h2>What are we<br>training today?</h2>
+      <p>Every session is different — your questions are freshly shuffled every time!</p>
+    </div>
+    <div class="grid">
+      <div class="tile" style="--tc:var(--blue)" onclick="go('blast')">
+        <span class="ti">⚡</span>
+        <div class="tn">Brain Blast</div>
+        <div class="td">5 quick questions — fast and fun!</div>
+      </div>
+      <div class="tile" style="--tc:var(--purple)" onclick="go('spotlight')">
+        <span class="ti">🎯</span>
+        <div class="tn">Skill Spotlight</div>
+        <div class="td">Pick one skill and really go for it.</div>
+      </div>
+      <div class="tile" style="--tc:var(--orange)" onclick="go('power')">
+        <span class="ti">🔋</span>
+        <div class="tn">Power Round</div>
+        <div class="td">10 questions — loads of stars to win!</div>
+      </div>
+      <div class="tile" id="champ-tile" style="--tc:var(--red)" onclick="go('champ')">
+        <span class="ti">👑</span>
+        <div class="tn">Champion Run</div>
+        <div class="td">Hardest questions only. Triple stars!</div>
+      </div>
+    </div>
+    <div class="cat-box" id="cat-box">
+      <label>Choose your skill topic</label>
+      <div class="chips" id="chips"></div>
+    </div>
+  </div>
+
+  <!-- LOADING -->
+  <div id="s-load">
+    <div class="ring"></div>
+    <p style="font-size:.86rem;color:var(--muted);font-weight:700">Getting your questions ready…</p>
+  </div>
+
+  <!-- GAME -->
+  <div id="s-game">
+    <div class="progress" id="progress"></div>
+    <div class="bar">
+      <span class="qnum" id="qnum">Question 1</span>
+      <div class="stars-badge">⭐ <span id="stotal">0</span> stars</div>
+      <div class="fire" id="fire">🔥 <span id="fire-n">2</span> in a row!</div>
+    </div>
+
+    <div class="qcard" id="qcard">
+      <div class="qcard-top">
+        <div class="qcat">
+          <div class="qcat-ico" id="qico">🧠</div>
+          <span class="qcat-name" id="qcatname">Topic</span>
+        </div>
+        <div class="qdots" id="qdots"></div>
+      </div>
+      <div class="qtext" id="qtext">Loading…</div>
+      <div class="qdata" id="qdata">
+        <div class="qdata-lbl">Look at this carefully 👇</div>
+        <div class="qdata-val" id="qdataval"></div>
+      </div>
+    </div>
+
+    <div class="hint-wrap">
+      <button class="hint-btn" id="hbtn" onclick="doHint()">💡 Brain Boost — tap for a hint!</button>
+      <div class="hint-reveal" id="hreveal"></div>
+    </div>
+
+    <div class="opts" id="opts"></div>
+    <div class="fb" id="fb"></div>
+    <div class="cheer" id="cheer">
+      <span class="cheer-big" id="cheer-big">🎉</span>
+      <span class="cheer-sm" id="cheer-sm">Amazing!</span>
+    </div>
+
+    <!-- THE NEXT BUTTON — always appears after answering, never hidden by a timer -->
+    <button class="next-btn" id="next-btn" onclick="nextQ()">Next Question! →</button>
+
+    <div class="sage-box">
+      <div class="sav">🧙</div>
+      <div class="stxt" id="stxt">
+        <strong>Sage says:</strong> Read carefully — and look at the data box if there is one!
+        <span class="slink" onclick="openSage()"> Ask Sage →</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- WIN -->
+  <div id="s-win">
+    <div class="trophy" id="trophy">🏆</div>
+    <div class="wtitle" id="wtitle">Amazing work!</div>
+    <div class="wsub" id="wsub">You finished the Brain Gym session. Every question makes your brain stronger!</div>
+    <div class="scores">
+      <div class="sc s"><span class="sn" id="ws">0</span><span class="sl">Stars Won</span></div>
+      <div class="sc r"><span class="sn" id="wr">0/0</span><span class="sl">Correct</span></div>
+      <div class="sc f"><span class="sn" id="wf">0</span><span class="sl">Best Streak 🔥</span></div>
+    </div>
+    <div class="breakdown" id="breakdown"></div>
+    <div class="wbtns">
+      <button class="wagain" onclick="location.reload()">Play Again! 🎮</button>
+      <button class="whome" onclick="location.href='index.html'">Back Home 🏠</button>
+    </div>
+  </div>
+
+</div><!-- /wrap -->
+<div id="toast"></div>
+
+<script>
+/* ════════════════════════════════════════
+   CONFIG
+════════════════════════════════════════ */
+const TSV  = 'game_bank.tsv';
+const SAGE = localStorage.getItem('ff_ta_link') || 'https://claude.ai/project/019c8725-05d6-7317-bd77-475bce4be335';
+
+// Kid-friendly topic names
+const FUN = {
+  'Executive Function'    : 'Super Planning',
+  'Working Memory'        : 'Memory Master',
+  'Focus Stamina'         : 'Laser Focus',
+  'Impulse Management'    : 'Think First',
+  'Emotional Regulation'  : 'Feelings Expert',
+  'Real-World Application': 'Life Skills',
+  'Technical Planning'    : 'Step by Step',
+};
+const ICO = {
+  'Executive Function':'🧠','Working Memory':'💾','Focus Stamina':'🎯',
+  'Impulse Management':'🛑','Emotional Regulation':'💛',
+  'Real-World Application':'🌍','Technical Planning':'📋',
+};
+const COL = {
+  'Executive Function':'#ea580c','Working Memory':'#3b82f6','Focus Stamina':'#d97706',
+  'Impulse Management':'#16a34a','Emotional Regulation':'#db2777',
+  'Real-World Application':'#0d9488','Technical Planning':'#7c3aed',
+};
+const CATS = Object.keys(FUN);
+
+// TSV column positions
+const C = {id:0,cat:1,sub:2,aud:3,diff:4,tmpl:5,vars:6,ans:7,dist:8,fmt:9,xp:10,sec:11,boss:12,hint:13,explain:14};
+
+const WIN_RIGHT = [
+  ['🌟 Brilliant!',  'You nailed it!'],
+  ['🎉 Amazing!',    'Fantastic answer!'],
+  ['⚡ Superstar!',  'Keep it going!'],
+  ['🔥 On fire!',    'That was perfect!'],
+  ['✨ Wow!',        'Your brain is working great!'],
+  ['🏆 Yes!',        'Absolutely right!'],
+  ['💥 Boom!',       'Right on target!'],
+  ['🦸 Hero!',       'Brain champion!'],
+];
+const WIN_WRONG = [
+  ['💪 Good try!',    'You\'ll get the next one!'],
+  ['🌈 Nearly!',      'Look at the right answer below.'],
+  ['😊 Keep going!', 'Every try helps you learn.'],
+  ['🧩 Close!',      'The explanation below helps.'],
+  ['🚀 Don\'t stop!','Every round makes you stronger.'],
+];
+const SAGE_TIPS = {
+  'Executive Function'    : ['Think about what needs to happen first.','What are the steps — in the right order?'],
+  'Working Memory'        : ['Look carefully, then try to remember!','Say it to yourself quietly — then answer.'],
+  'Focus Stamina'         : ['Take a breath and focus on just this one question.','One thing at a time — you\'ve got this!'],
+  'Impulse Management'    : ['Read ALL the choices before picking — take your time!','Your first idea is not always the right one. Think it through!'],
+  'Emotional Regulation'  : ['Think about what actually helps in that situation.','There are no wrong feelings — just think carefully.'],
+  'Real-World Application': ['Imagine it really happening — what would you do?','Think about what works best in real life.'],
+  'Technical Planning'    : ['What order would you do these things in?','Every big task has smaller steps hidden inside it.'],
+};
+
+// Word pool for memory drills
+const WPOOL = [
+  'apple','bridge','cloud','dancer','engine','forest','guitar','harbour',
+  'island','jacket','kettle','lantern','mirror','needle','ocean','pencil',
+  'rabbit','shadow','tunnel','violet','candle','diamond','feather','garden',
+  'hollow','jungle','kitten','lemon','marble','rocket','silver','thunder',
+  'umbrella','valley','walnut','basket','pebble','flame','castle','dragon',
+];
+
+const rnd  = a => a[Math.floor(Math.random()*a.length)];
+const rndN = (n,a) => { const s=[...a],r=[]; while(r.length<n&&s.length)r.push(s.splice(Math.floor(Math.random()*s.length),1)[0]); return r; };
+const ri   = (lo,hi) => Math.floor(Math.random()*(hi-lo+1))+lo;
+const shuf = a => [...a].sort(()=>Math.random()-.5);
+
+/* ════════════════════════════════════════
+   PERSISTENT STATE
+════════════════════════════════════════ */
+const ld = (k,d) => { try{ return JSON.parse(localStorage.getItem('ff_'+k))??d }catch{ return d }};
+const sv = (k,v) => localStorage.setItem('ff_'+k, JSON.stringify(v));
+
+const playerLv = getLvNum(ld('xp',0));
+
+/* ════════════════════════════════════════
+   SESSION STATE
+════════════════════════════════════════ */
+let ROWS=[], Q=[], idx=0;
+let stars=0, hits=0, combo=0, best=0;
+let hintUsed=0, hintShown=false;
+let mode='blast', selCat=null;
+let catLog={};
+
+/* ════════════════════════════════════════
+   BOOT
+════════════════════════════════════════ */
+window.addEventListener('DOMContentLoaded', () => {
+  // Lock Champion Run until level 5
+  if(playerLv < 5){
+    const ct = document.getElementById('champ-tile');
+    ct.classList.add('off');
+    ct.innerHTML += '<span class="tlock">🔒 Level 5</span>';
+  }
+  buildChips();
+  show('s-pick');
+});
+
+/* ════════════════════════════════════════
+   MODE SELECTION
+════════════════════════════════════════ */
+function buildChips(){
+  document.getElementById('chips').innerHTML = CATS.map(c => `
+    <div class="chip" data-cat="${c}"
+      style="border-color:${COL[c]}40"
+      onclick="pickCat(this,'${c}')">
+      ${ICO[c]} ${FUN[c]}
+    </div>`).join('');
+}
+
+function pickCat(el, cat){
+  selCat = cat;
+  document.querySelectorAll('.chip').forEach(c => {
+    c.classList.remove('on');
+    c.style.background = '';
+    c.style.borderColor = COL[c.dataset.cat]+'40';
+    c.style.color = '';
+  });
+  el.classList.add('on');
+  el.style.background   = COL[cat];
+  el.style.color        = '#fff';
+  el.style.borderColor  = COL[cat];
+}
+
+function go(m){
+  if(m === 'champ' && playerLv < 5){ toast('🔒 Champion Run unlocks at Level 5!'); return; }
+  mode = m;
+  if(m === 'spotlight'){
+    document.getElementById('cat-box').style.display = 'block';
+    if(!selCat){ toast('Choose a skill topic first! 👆'); return; }
+  }
+  load();
+}
+
+/* ════════════════════════════════════════
+   LOAD TSV
+════════════════════════════════════════ */
+async function load(){
+  hide('s-pick'); show('s-load');
+  try{
+    const r = await fetch(TSV);
+    if(!r.ok) throw new Error();
+    ROWS = (await r.text()).trim().split('\n').slice(1).map(l=>l.split('\t'));
+    buildSession();
+    hide('s-load');
+    drawProgress();
+    renderQ();
+    show('s-game');
+  } catch {
+    document.getElementById('s-load').innerHTML = `
+      <div style="font-size:3rem;margin-bottom:10px">😬</div>
+      <p style="font-family:'Baloo 2',cursive;font-size:1.2rem;font-weight:800;margin-bottom:6px">Oops! File not found</p>
+      <p style="font-size:.82rem;color:var(--muted);font-weight:700">Put <strong>game_bank.tsv</strong> in the same folder as this file.</p>
+      <a href="index.html" style="color:var(--blue);font-weight:800;margin-top:14px;display:inline-block">← Go Home</a>`;
+  }
+}
+
+/* ════════════════════════════════════════
+   BUILD SESSION
+════════════════════════════════════════ */
+function buildSession(){
+  const QN = mode === 'power' ? 10 : 5;
+
+  // Youth and mixed audience only — no adult-only cards
+  let pool = ROWS.filter(r => r[C.aud] !== 'adult');
+
+  // Boss / normal split
+  if(mode === 'champ') pool = pool.filter(r => r[C.boss] === 'true');
+  else                  pool = pool.filter(r => r[C.boss] !== 'true');
+
+  // Topic filter
+  if(mode === 'spotlight' && selCat) pool = pool.filter(r => r[C.cat] === selCat);
+
+  // Brain Blast: easier questions only (diff 1–2)
+  if(mode === 'blast') pool = pool.filter(r => parseInt(r[C.diff]||1) <= 2);
+
+  Q = shuf(pool).slice(0, Math.min(QN, pool.length));
+  CATS.forEach(c => catLog[c] = {a:0,t:0});
+}
+
+/* ════════════════════════════════════════
+   PROGRESS PIPS
+════════════════════════════════════════ */
+function drawProgress(){
+  document.getElementById('progress').innerHTML =
+    Q.map((_,i) => `<div class="pip" id="pip-${i}">⭐</div>`).join('');
+  updatePips();
+}
+function updatePips(){
+  Q.forEach((_,i) => {
+    const el = document.getElementById('pip-'+i);
+    if(!el) return;
+    el.className = 'pip' + (i < idx ? ' done' : i === idx ? ' active' : '');
+  });
+}
+
+/* ════════════════════════════════════════
+   RENDER QUESTION
+════════════════════════════════════════ */
+function renderQ(){
+  if(idx >= Q.length){ endGame(); return; }
+
+  const r    = Q[idx];
+  const cat  = r[C.cat] || '';
+  const cc   = COL[cat]  || '#3b82f6';
+  const diff = parseInt(r[C.diff]) || 1;
+  hintShown  = false;
+
+  // Counter
+  document.getElementById('qnum').textContent = `Question ${idx+1} of ${Q.length}`;
+  updatePips();
+
+  // Card accent colour
+  document.getElementById('qcard').style.setProperty('--cc', cc);
+
+  // Category chip
+  const ico = document.getElementById('qico');
+  ico.textContent              = ICO[cat] || '⚡';
+  ico.style.background         = cc + '22';
+  const cn = document.getElementById('qcatname');
+  cn.textContent = FUN[cat] || cat;
+  cn.style.color = cc;
+
+  // Difficulty dots
+  document.getElementById('qdots').innerHTML =
+    [1,2,3].map(d => `<div class="dot${d<=diff?' on':''}" ${d<=diff?'style="background:'+cc+'"':''}></div>`).join('');
+
+  // Build injected question
+  const {qText, injected, correctAns, options} = inject(r);
+
+  document.getElementById('qtext').textContent = qText;
+
+  const qd = document.getElementById('qdata');
+  if(injected){
+    qd.style.display = 'block';
+    document.getElementById('qdataval').textContent = injected;
+  } else {
+    qd.style.display = 'none';
+  }
+
+  // Hint reset
+  const hb = document.getElementById('hbtn');
+  hb.style.display = 'block';
+  hb.disabled      = false;
+  document.getElementById('hreveal').style.display = 'none';
+
+  // ── OPTIONS ──────────────────────────────────────────────
+  // Key fix: store correct answer in a data attribute on each button
+  // so answer comparison never relies on string escaping
+  const letters  = ['A','B','C','D'];
+  const shuffled = shuf([...options]).slice(0,4);
+
+  document.getElementById('opts').innerHTML = shuffled.map((opt,i) => `
+    <button class="opt"
+      data-val="${encodeURIComponent(opt)}"
+      data-correct="${encodeURIComponent(correctAns)}"
+      data-explain="${encodeURIComponent(r[C.explain]||'')}"
+      data-xp="${parseInt(r[C.xp])||10}"
+      onclick="answer(this)">
+      <span class="ltr">${letters[i]}</span>
+      <span class="opt-txt">${opt}</span>
+    </button>`).join('');
+
+  // Reset feedback / celebration / next button
+  document.getElementById('fb').style.display    = 'none';
+  document.getElementById('cheer').style.display = 'none';
+  document.getElementById('next-btn').style.display = 'none';
+
+  // Sage tip
+  const tips = SAGE_TIPS[cat] || ['Read the question carefully — take your time!'];
+  document.getElementById('stxt').innerHTML =
+    `<strong>Sage says:</strong> ${rnd(tips)} <span class="slink" onclick="openSage()">Ask Sage →</span>`;
+
+  // Combo fire badge
+  const fire = document.getElementById('fire');
+  if(combo >= 2){
+    document.getElementById('fire-n').textContent = combo;
+    fire.classList.add('on');
+  } else {
+    fire.classList.remove('on');
+  }
+
+  // Animate card in
+  const card = document.getElementById('qcard');
+  card.style.animation = 'none';
+  void card.offsetWidth;
+  card.style.animation = '';
+}
+
+/* ════════════════════════════════════════
+   VARIABLE INJECTION
+════════════════════════════════════════ */
+function inject(r){
+  let text   = r[C.tmpl] || '';
+  const slots = (r[C.vars]||'').split(',').map(s=>s.trim()).filter(Boolean);
+  const ansLogic  = r[C.ans]  || '';
+  const distLogic = r[C.dist] || '';
+
+  let injected   = '';
+  let correctAns = '';
+  let genWords   = [];
+  let genNums    = [];
+
+  // ── SLOT HANDLERS ──────────────────────────────────────
+  slots.forEach(slot => {
+    const mw = slot.match(/^WORDS_(\d+)$/);
+    const mn = slot.match(/^NUMBERS_(\d+)/);
+    const md = slot.match(/^DIGITS_(\d+)$/);
+
+    if(mw){
+      const n = parseInt(mw[1]);
+      genWords   = rndN(n, WPOOL);
+      injected   = genWords.join(', ');
+      text = text.replace(/\{\{WORDS_\d+\}\}/, injected);
+    }
+    else if(mn){
+      const n     = Math.min(parseInt(mn[1]), 6);
+      const step  = ri(2,5);
+      const start = ri(2,15);
+      genNums = Array.from({length:n}, (_,i) => start + i*step);
+
+      if(slot.includes('GAP')){
+        const gi  = ri(1, n-2);
+        const wg  = genNums.map(String);
+        wg[gi]    = '___';
+        injected  = wg.join('  →  ');
+        correctAns = String(genNums[gi]);
+      } else {
+        injected   = genNums.join('  →  ');
+        correctAns = String(genNums[genNums.length-1] + step);
+      }
+      text = text.replace(/\{\{NUMBERS_\d+[^}]*\}\}/, injected)
+                 .replace(/\{\{SEQ_WITH_GAP\}\}/, injected);
+    }
+    else if(md){
+      const n    = parseInt(md[1]);
+      const digs = Array.from({length:n}, () => ri(1,9));
+      genWords   = digs.map(String);
+      injected   = digs.join(' — ');
+      correctAns = ansLogic.includes('reversed')
+        ? [...digs].reverse().join(' — ')
+        : digs.join(' — ');
+      text = text.replace(/\{\{DIGITS_\d+\}\}/, injected);
+    }
+    else {
+      // Map of all simple substitutions
+      const M = {
+        NAME       : () => rnd(['Alex','Sam','Jordan','Casey','Riley','Morgan','Taylor','Jamie']),
+        NAME2      : () => rnd(['Elliot','Frankie','Blake','Dana','Quinn']),
+        NEW_NAME   : () => rnd(['Alex','Sam','Jordan','Riley']),
+        PLACE      : () => rnd(['the park','the library','school','the shops','a friend\'s house']),
+        OBJECT     : () => rnd(['book','water bottle','pencil case','backpack','lunchbox']),
+        OBJECT2    : () => rnd(['notebook','hat','keys','charger']),
+        SCENARIO   : () => rnd(['you forgot your homework','the computer stopped working','your friend cancelled plans','you got a question wrong']),
+        TASK       : () => rnd(['tidy your desk','pack your bag','write a list','get ready for school']),
+        TASK2      : () => rnd(['have breakfast','brush your teeth','find your shoes']),
+        TASK3      : () => rnd(['check your bag','say goodbye','close the door']),
+        EMOTION    : () => rnd(['happy','frustrated','worried','proud','excited','calm']),
+        COLOUR     : () => rnd(['red','blue','green','yellow','purple','orange']),
+        COLOUR2    : () => rnd(['pink','white','black','silver']),
+        NUMBER     : () => String(ri(3,8)),
+        NUM1       : () => String(ri(2,6)),
+        NUM2       : () => String(ri(2,6)),
+        N          : () => String(ri(2,4)),
+        STEPS      : () => String(ri(4,6)),
+        DAYS       : () => String(ri(3,10)),
+        HOURS      : () => String(ri(1,4)),
+        TIME       : () => ri(8,12)+':00',
+        START_TIME : () => ri(8,10)+':00',
+        TRAVEL_MINS: () => String(ri(10,25)),
+        PREP_MINS  : () => String(ri(5,15)),
+        ESTIMATE   : () => String(ri(10,20)),
+        ACTUAL     : () => String(ri(15,30)),
+        DIFF       : () => String(ri(5,15)),
+        START      : () => String(ri(10,50)),
+        STEP       : () => String(ri(2,5)),
+        CURRENT    : () => String(ri(10,30)),
+        LAST       : () => String(ri(10,30)),
+        MINS_AGO   : () => String(ri(5,15)),
+        TIME_AGO   : () => ri(3,10)+' minutes ago',
+        TIMEFRAME  : () => ri(1,3)+' days',
+        TODAY      : () => 'today',
+        WAIT_DAYS  : () => String(ri(1,3)),
+        BLOCK_STEP : () => String(ri(1,2)),
+        BLOCKED_STEPS:()=> String(ri(1,2)),
+        SLEEP_TIME : () => rnd(['9:30pm','10:00pm','10:30pm']),
+        TIME_OF_DAY: () => rnd(['after lunch','in the morning','after school']),
+        SUBJECT    : () => rnd(['Maths','Science','English','History']),
+        EVENT      : () => rnd(['a test','a performance','a presentation','sports day']),
+        PROJECT    : () => rnd(['the science project','the report','the assignment']),
+        DAY        : () => rnd(['Friday','Monday','Wednesday','next week']),
+        ACTIVITY   : () => rnd(['drawing','reading','building something','a game']),
+        NEXT_TASK  : () => rnd(['homework','dinner','tidying up','an appointment']),
+        POSITION   : () => rnd(['first','second','third','fourth']),
+        DEPENDENCY : () => rnd(['the internet','a specific tool','someone\'s help','a delivery']),
+        INCOME     : () => String(ri(500,1000)),
+        FIXED      : () => String(ri(200,400)),
+        VARIABLE   : () => String(ri(50,150)),
+      };
+      if(M[slot]) text = text.replace(new RegExp('\\{\\{'+slot+'\\}\\}','g'), M[slot]());
+    }
+  });
+
+  // Clean up any leftover tokens after all slots processed
+  text = text.replace(/\{\{[A-Z0-9_]+\}\}/g, '...');
+
+  // Resolve correct answer if not already set by numeric/word slots
+  if(!correctAns) correctAns = resolveAns(ansLogic, genWords, genNums, distLogic);
+
+  // Build the four answer options
+  const dists  = makeDists(distLogic, correctAns, genWords, genNums);
+  const allOpts = [correctAns, ...dists].slice(0,4);
+
+  return { qText: text, injected, correctAns, options: allOpts };
+}
+
+function resolveAns(logic, words, nums, distLogic){
+  if(logic.startsWith('words[')){
+    const i = parseInt(logic.match(/\[(\d+)\]/)?.[1] || 0);
+    return words[i] || words[0] || 'answer';
+  }
+  if(logic.includes('next_in_sequence') && nums.length){
+    const step = nums[1] - nums[0];
+    return String(nums[nums.length-1] + step);
+  }
+  if(logic.includes('missing_value') && nums.length){
+    return String(nums[Math.floor(nums.length/2)]);
+  }
+  if(logic.includes('reversed') && words.length){
+    return [...words].reverse().join(' — ');
+  }
+  // Scenario questions: first entry from distractor field is the correct one
+  const parts = distLogic.split('_or_').map(s => s.replace(/_/g,' ').trim()).filter(Boolean);
+  return parts[0] || logic || 'See the answer below';
+}
+
+function makeDists(logic, correct, words, nums){
+  const d = [];
+  if(words.length > 1){
+    d.push(...rndN(3, words.filter(w => w !== correct)));
+  } else if(nums.length > 1){
+    const step = nums[1] - nums[0];
+    const base = parseInt(correct) || 0;
+    d.push(String(base+step), String(base-step), String(base+step*2));
+  } else {
+    const parts = logic.split('_or_').map(s => s.replace(/_/g,' ').trim()).filter(Boolean);
+    d.push(...parts.slice(1, 4)); // skip first (that's the correct one)
+  }
+  // Fill to 3 if needed
+  const pad = words.length ? words : ['Maybe','Sometimes','Never'];
+  while(d.filter(x => x && x !== correct).length < 3){
+    const f = rnd(pad);
+    if(f !== correct && !d.includes(f)) d.push(f);
+  }
+  return d.filter(x => x && x !== correct).slice(0,3);
+}
+
+/* ════════════════════════════════════════
+   ANSWER — uses data attributes, no string escaping
+════════════════════════════════════════ */
+function answer(btn){
+  const chosen    = decodeURIComponent(btn.dataset.val);
+  const correct   = decodeURIComponent(btn.dataset.correct);
+  const explain   = decodeURIComponent(btn.dataset.explain);
+  const xpVal     = parseInt(btn.dataset.xp) || 10;
+  const isRight   = chosen.trim().toLowerCase() === correct.trim().toLowerCase();
+
+  // Lock all options and colour them
+  document.querySelectorAll('.opt').forEach(opt => {
+    opt.disabled = true;
+    const optVal = decodeURIComponent(opt.dataset.val);
+    if(optVal.trim().toLowerCase() === correct.trim().toLowerCase()){
+      opt.classList.add(isRight && optVal === chosen ? 'correct' : 'show-right');
+    }
+    if(!isRight && optVal === chosen){
+      opt.classList.add('wrong');
+    }
+  });
+
+  // Stars
+  const earned = isRight ? xpVal : 0;
+  if(earned > 0){
+    stars += earned;
+    const st = document.getElementById('stotal');
+    st.textContent = stars;
+    st.classList.add('bump');
+    setTimeout(() => st.classList.remove('bump'), 350);
+  }
+
+  // Combo tracking
+  if(isRight){ combo++; best = Math.max(best, combo); hits++; }
+  else        { combo = 0; document.getElementById('fire').classList.remove('on'); }
+
+  // Category log
+  const cat = Q[idx]?.[C.cat] || '';
+  if(!catLog[cat]) catLog[cat] = {a:0,t:0};
+  catLog[cat].t++;
+  if(isRight) catLog[cat].a++;
+
+  // Show celebration or feedback
+  if(isRight){
+    const [big, sm] = rnd(WIN_RIGHT);
+    document.getElementById('cheer-big').textContent = big;
+    document.getElementById('cheer-sm').textContent  = sm;
+    document.getElementById('cheer').style.display   = 'block';
+    document.getElementById('fb').style.display      = 'none';
+  } else {
+    const [big, sm] = rnd(WIN_WRONG);
+    const fb = document.getElementById('fb');
+    fb.className = 'fb bad';
+    fb.innerHTML = `${big} ${sm}${explain ? '<br><br>' + explain : ''}`;
+    fb.style.display = 'block';
+    document.getElementById('cheer').style.display = 'none';
+  }
+
+  // Sage comment
+  const sc = isRight
+    ? ['Great brain work! 🌟', 'You\'re getting stronger every question!', 'That\'s the skill building — well done!']
+    : ['Good try! Look at the correct answer above.', 'That one was tricky — now you know it!', 'Every miss is a lesson — keep going!'];
+  document.getElementById('stxt').innerHTML =
+    `<strong>Sage says:</strong> ${rnd(sc)} <span class="slink" onclick="openSage()">Ask Sage →</span>`;
+
+  // Save XP
+  if(earned > 0) saveXP(earned, 'game', cat);
+
+  // ── SHOW THE NEXT BUTTON ──────────────────────────────
+  // This is unconditional — it always appears after every answer
+  document.getElementById('hbtn').style.display    = 'none';
+  document.getElementById('next-btn').style.display = 'block';
+}
+
+/* ════════════════════════════════════════
+   HINT
+════════════════════════════════════════ */
+function doHint(){
+  if(hintShown) return;
+  hintShown = true; hintUsed++;
+  const r = Q[idx];
+  document.getElementById('hreveal').textContent =
+    '💡 ' + (r?.[C.hint] || 'Think carefully about all the choices!');
+  document.getElementById('hreveal').style.display = 'block';
+  document.getElementById('hbtn').style.display    = 'none';
+  stars = Math.max(0, stars - 2);
+  document.getElementById('stotal').textContent = stars;
+  toast('💡 Hint revealed! (-2 stars)');
+}
+
+/* ════════════════════════════════════════
+   NEXT
+════════════════════════════════════════ */
+function nextQ(){
+  // Hide next button immediately to prevent double-tap
+  document.getElementById('next-btn').style.display = 'none';
+  idx++;
+  renderQ();
+}
+
+/* ════════════════════════════════════════
+   END GAME
+════════════════════════════════════════ */
+function endGame(){
+  const total = Q.length;
+  const pct   = total > 0 ? Math.round((hits/total)*100) : 0;
+
+  let icon, title, sub;
+  if(pct >= 80){
+    icon='🏆'; title='Incredible!';
+    sub='You got most of them right. Your brain is seriously powerful!';
+  } else if(pct >= 50){
+    icon='🌟'; title='Great work!';
+    sub='Really solid session. The ones you got wrong are already teaching you — that\'s how brains grow!';
+  } else {
+    icon='💪'; title='You did it!';
+    sub='Every session makes you stronger — even when it\'s hard. Come back and try again, you\'ll see the difference!';
+  }
+
+  document.getElementById('trophy').textContent = icon;
+  document.getElementById('wtitle').textContent = title;
+  document.getElementById('wsub').textContent   = sub;
+  document.getElementById('ws').textContent     = stars;
+  document.getElementById('wr').textContent     = `${hits}/${total}`;
+  document.getElementById('wf').textContent     = best;
+
+  // Topic breakdown
+  const bd = document.getElementById('breakdown');
+  const act = Object.entries(catLog).filter(([,v])=>v.t>0);
+  if(act.length){
+    bd.innerHTML = '<h4>How you did by topic</h4>' +
+      act.map(([cat,v]) => {
+        const dots = Array.from({length:v.t},(_,i)=>`<div class="brd${i<v.a?' on':''}"></div>`).join('');
+        return `<div class="br">
+          <span class="br-ico">${ICO[cat]||'⚡'}</span>
+          <span class="br-nm" style="color:${COL[cat]}">${FUN[cat]||cat}</span>
+          <div class="br-dots">${dots}</div>
+        </div>`;
+      }).join('');
+  } else {
+    bd.style.display = 'none';
+  }
+
+  hide('s-game'); show('s-win');
+
+  // Hint-free badge
+  if(hintUsed === 0 && total >= 5){
+    const b = ld('badges',{});
+    if(!b.badge_nohint){ b.badge_nohint=Date.now(); sv('badges',b); toast('🏅 Badge: Hint-Free hero!'); }
+  }
+}
+
+/* ════════════════════════════════════════
+   WRITE BACK TO HUB STATE
+════════════════════════════════════════ */
+function saveXP(amt, mode, cat){
+  let xp = ld('xp',0); xp += amt; sv('xp', xp);
+  sv('sessions', ld('sessions',0)+1);
+  const today = new Date().toDateString();
+  let str = ld('streak',0), last = ld('lastDate','');
+  if(last !== today){
+    const yest = new Date(Date.now()-86400000).toDateString();
+    str = (last === yest) ? str+1 : 1;
+    sv('streak', str); sv('lastDate', today);
+  }
+  if(cat){ const dc=ld('doneCats',{}); dc[cat]=(dc[cat]||0)+1; sv('doneCats',dc); }
+  const hist = ld('history',[]);
+  hist.push({ts:Date.now(), mode, label:mode+' session', cat, xp:amt,
+    score: Math.round((hits/Math.max(Q.length,1))*100)+'%', level:getLvNum(xp)});
+  sv('history', hist);
+}
+
+/* ════════════════════════════════════════
+   UTILS
+════════════════════════════════════════ */
+function getLvNum(v){
+  const L=[0,150,400,750,1200,1800,2600,3600];
+  let n=1; for(let i=0;i<L.length;i++){if(v>=L[i])n=i+1;} return n;
+}
+function show(id){ document.getElementById(id).style.display='flex'; }
+function hide(id){ document.getElementById(id).style.display='none'; }
+
+let _tt;
+function toast(msg){
+  const el=document.getElementById('toast');
+  el.textContent=msg; el.classList.add('on');
+  clearTimeout(_tt); _tt=setTimeout(()=>el.classList.remove('on'),3000);
+}
+function openSage(){
+  const r = Q[idx];
+  const ctx = r ? `?cat=${encodeURIComponent(r[C.cat]||'')}&q=${encodeURIComponent((r[C.tmpl]||'').slice(0,60))}` : '';
+  window.open(SAGE+ctx,'_blank');
+}
+</script>
+</body>
+</html>
