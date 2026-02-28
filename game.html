@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Brain Gym 🧠</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --sky:#eef6ff; --sky2:#daeeff; --white:#fff;
+  --text:#1a2740; --muted:#6b7fa0; --border:rgba(26,39,64,.09);
+  --blue:#3b82f6; --green:#15803d; --green-bg:rgba(21,128,61,.07);
+  --red:#b91c1c;  --red-bg:rgba(185,28,28,.06);
+  --yellow:#d97706; --purple:#7c3aed; --orange:#ea580c;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Nunito',sans-serif;background:var(--sky);color:var(--text);min-height:100vh}
+button{font-family:'Nunito',sans-serif;cursor:pointer;border:none}
+
+body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:radial-gradient(circle at 12% 18%,rgba(59,130,246,.1) 0%,transparent 36%),
+             radial-gradient(circle at 88%  78%,rgba(124,58,237,.08) 0%,transparent 36%),
+             radial-gradient(rgba(26,39,64,.032) 1px,transparent 1px);
+  background-size:100% 100%,100% 100%,24px 24px}
+
+.wrap{position:relative;z-index:1;max-width:620px;margin:0 auto;padding:0 16px 80px;min-height:100vh;display:flex;flex-direction:column}
+
+/* ── NAV ─────────── */
+nav{display:flex;align-items:center;justify-content:space-between;padding:18px 0 20px}
+.back{display:flex;align-items:center;gap:5px;color:var(--muted);font-size:.82rem;font-weight:800;text-decoration:none;background:var(--white);border:2px solid var(--border);border-radius:50px;padding:7px 14px;transition:border-color .15s,color .15s}
+.back:hover{border-color:var(--blue);color:var(--blue)}
+.brand{font-family:'Baloo 2',cursive;font-size:1.1rem;font-weight:800;color:var(--blue)}
+.sage-btn{display:flex;align-items:center;gap:6px;background:var(--white);border:2px solid rgba(124,58,237,.3);border-radius:50px;padding:7px 14px;color:var(--purple);font-size:.78rem;font-weight:800;transition:all .15s}
+.sage-btn:hover{background:rgba(124,58,237,.06);border-color:var(--purple)}
+.sdot{width:7px;height:7px;border-radius:50%;background:#16a34a;box-shadow:0 0 5px #16a34a;animation:blink 2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* ── MODE SELECT ─── */
+#s-pick{flex:1;display:flex;flex-direction:column;align-items:center;padding-top:4px}
+.hero{text-align:center;margin-bottom:26px}
+.hero-badge{display:inline-block;background:rgba(59,130,246,.1);border:2px solid rgba(59,130,246,.2);border-radius:50px;padding:5px 14px;font-size:.7rem;font-weight:800;color:var(--blue);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:10px}
+.hero h2{font-family:'Baloo 2',cursive;font-size:2.1rem;font-weight:800;line-height:1.2;margin-bottom:6px}
+.hero p{font-size:.87rem;color:var(--muted);line-height:1.6;font-weight:700;max-width:340px;margin:0 auto}
+
+.mode-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%;margin-bottom:16px}
+.tile{background:var(--white);border:3px solid var(--border);border-radius:22px;padding:18px 14px 14px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden;text-align:left}
+.tile::before{content:'';position:absolute;top:0;left:0;right:0;height:5px;background:var(--tc,var(--blue));border-radius:2px 2px 0 0}
+.tile:hover{border-color:var(--tc,var(--blue));transform:translateY(-4px);box-shadow:0 8px 22px color-mix(in srgb,var(--tc,var(--blue)) 16%,transparent)}
+.tile.off{opacity:.45;cursor:not-allowed;pointer-events:none}
+.ti{font-size:2.2rem;display:block;margin-bottom:8px}
+.tn{font-family:'Baloo 2',cursive;font-size:1rem;font-weight:800;margin-bottom:3px}
+.td{font-size:.74rem;color:var(--muted);line-height:1.45;font-weight:700}
+.tlock{position:absolute;top:9px;right:9px;font-size:.64rem;font-weight:800;background:var(--sky2);border-radius:50px;padding:2px 8px;color:var(--muted)}
+
+/* topic picker */
+.cat-box{display:none;width:100%;background:var(--white);border:2px solid var(--border);border-radius:20px;padding:14px;margin-bottom:8px}
+.cat-box label{display:block;font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);margin-bottom:9px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{padding:6px 13px;border-radius:50px;font-size:.76rem;font-weight:800;border:2px solid transparent;background:var(--sky2);color:var(--muted);cursor:pointer;transition:all .15s}
+.chip.on{color:#fff}
+
+/* ── LOADING ─────── */
+#s-load{flex:1;display:none;flex-direction:column;align-items:center;justify-content:center;gap:14px}
+.ring{width:48px;height:48px;border-radius:50%;border:4px solid var(--sky2);border-top-color:var(--blue);animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+#s-load p{font-size:.86rem;color:var(--muted);font-weight:700}
+
+/* ── GAME SCREEN ──── */
+#s-game{flex:1;display:none;flex-direction:column}
+
+/* progress stars */
+.progress{display:flex;justify-content:center;gap:10px;margin-bottom:18px}
+.pip{font-size:1.55rem;transition:all .35s;filter:grayscale(1);opacity:.18;transform:scale(.78)}
+.pip.active{filter:none;opacity:.45;transform:scale(.9)}
+.pip.done{filter:none;opacity:1;transform:scale(1);animation:pop .4s cubic-bezier(.34,1.56,.64,1) both}
+@keyframes pop{0%{transform:scale(.3) rotate(-25deg)}70%{transform:scale(1.3) rotate(8deg)}100%{transform:scale(1) rotate(0)}}
+
+/* top bar */
+.bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px}
+.qnum{font-family:'Baloo 2',cursive;font-size:.95rem;font-weight:800;color:var(--muted)}
+.star-pill{display:flex;align-items:center;gap:5px;background:var(--white);border:2px solid rgba(217,119,6,.3);border-radius:50px;padding:5px 14px}
+.star-pill span{font-family:'Baloo 2',cursive;font-size:.9rem;font-weight:800;color:var(--yellow)}
+.star-pill span.bump{animation:bump .3s ease}
+@keyframes bump{50%{transform:scale(1.5)}}
+.fire-pill{display:none;align-items:center;gap:4px;background:rgba(234,88,12,.08);border:2px solid rgba(234,88,12,.2);border-radius:50px;padding:5px 11px;font-size:.74rem;font-weight:800;color:var(--orange)}
+.fire-pill.on{display:flex}
+
+/* question card */
+.qcard{background:var(--white);border:3px solid var(--border);border-radius:24px;padding:22px 20px;margin-bottom:14px;position:relative;overflow:hidden}
+.qcard::before{content:'';position:absolute;top:0;left:0;right:0;height:6px;background:var(--cc,var(--blue));border-radius:2px 2px 0 0}
+.qcard-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.qcat{display:flex;align-items:center;gap:8px}
+.qcat-ico{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:.95rem;flex-shrink:0}
+.qcat-name{font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:1.2px}
+.lvdots{display:flex;gap:5px}
+.lvd{width:9px;height:9px;border-radius:50%;background:var(--sky2)}
+.lvd.on{background:var(--cc,var(--blue))}
+
+.qtext{font-family:'Baloo 2',cursive;font-size:1.12rem;font-weight:700;line-height:1.6;color:var(--text)}
+
+/* hint */
+.hint-wrap{margin-bottom:12px}
+.hint-btn{width:100%;padding:10px 16px;background:rgba(217,119,6,.07);border:2px dashed rgba(217,119,6,.35);border-radius:14px;color:#92400e;font-size:.82rem;font-weight:800;transition:all .15s;text-align:center}
+.hint-btn:hover:not([disabled]){background:rgba(217,119,6,.14);border-style:solid}
+.hint-btn[disabled]{opacity:.3;cursor:not-allowed}
+.hint-reveal{display:none;padding:11px 14px;background:rgba(217,119,6,.07);border:2px solid rgba(217,119,6,.25);border-radius:14px;font-size:.84rem;color:#92400e;font-weight:700;line-height:1.55}
+
+/* answer options — big, vertical, full width */
+.opts{display:flex;flex-direction:column;gap:10px;margin-bottom:14px}
+.opt{
+  width:100%;padding:16px 18px;
+  background:var(--white);border:3px solid var(--border);border-radius:17px;
+  font-size:.96rem;font-weight:800;color:var(--text);
+  text-align:left;display:flex;align-items:center;gap:13px;
+  transition:border-color .15s,background .15s,transform .15s;
+  cursor:pointer;
+}
+.opt:hover:not([disabled]){border-color:var(--blue);transform:translateX(4px)}
+.opt-letter{
+  width:30px;height:30px;border-radius:9px;flex-shrink:0;
+  background:var(--sky2);display:flex;align-items:center;justify-content:center;
+  font-family:'Baloo 2',cursive;font-size:.78rem;font-weight:800;color:var(--muted);
+  transition:all .2s;
+}
+.opt-text{flex:1;line-height:1.4}
+.opt[disabled]{cursor:default;transform:none}
+
+/* correct / wrong / reveal states */
+.opt.correct{
+  border-color:var(--green);background:var(--green-bg);color:var(--green);
+  animation:slam .25s cubic-bezier(.34,1.56,.64,1);
+}
+.opt.correct .opt-letter{background:var(--green);color:#fff}
+.opt.wrong{border-color:var(--red);background:var(--red-bg);color:var(--red)}
+.opt.wrong .opt-letter{background:var(--red);color:#fff}
+.opt.reveal{border-color:rgba(21,128,61,.4);background:var(--green-bg);color:var(--green)}
+.opt.reveal .opt-letter{background:rgba(21,128,61,.18);color:var(--green)}
+@keyframes slam{from{transform:scale(.97)}to{transform:scale(1)}}
+
+/* feedback */
+.feedback{display:none;border-radius:16px;padding:14px 17px;margin-bottom:12px;font-size:.88rem;font-weight:700;line-height:1.6}
+.feedback.good{background:rgba(21,128,61,.07);border:2px solid rgba(21,128,61,.2);color:var(--green)}
+.feedback.bad{background:var(--red-bg);border:2px solid rgba(185,28,28,.18);color:var(--red)}
+
+/* celebration */
+.cheer{display:none;text-align:center;padding:8px 0 4px;animation:cheerpop .45s cubic-bezier(.34,1.56,.64,1) both}
+@keyframes cheerpop{from{opacity:0;transform:scale(.3) rotate(-12deg)}to{opacity:1;transform:scale(1) rotate(0)}}
+.cheer-big{font-family:'Baloo 2',cursive;font-size:2rem;font-weight:800;color:var(--green);display:block;line-height:1.2}
+.cheer-sm{font-size:.8rem;color:var(--muted);font-weight:700}
+
+/* THE NEXT BUTTON — big, blue, always shows after answer */
+.next-btn{
+  display:none;width:100%;padding:18px;
+  background:linear-gradient(135deg,var(--blue),var(--purple));
+  border-radius:18px;color:#fff;
+  font-family:'Baloo 2',cursive;font-size:1.15rem;font-weight:800;
+  box-shadow:0 6px 22px rgba(59,130,246,.35);
+  transition:transform .15s,box-shadow .15s;
+  margin-bottom:14px;
+  animation:rise .3s cubic-bezier(.34,1.56,.64,1) both;
+}
+@keyframes rise{from{opacity:0;transform:translateY(16px) scale(.95)}to{opacity:1;transform:translateY(0) scale(1)}}
+.next-btn:hover{transform:translateY(-3px);box-shadow:0 10px 30px rgba(59,130,246,.42)}
+.next-btn:active{transform:translateY(0)}
+
+/* sage nudge */
+.sage-box{display:flex;gap:9px;align-items:flex-start;padding:10px 14px;background:rgba(124,58,237,.06);border:2px solid rgba(124,58,237,.15);border-radius:13px}
+.sav{width:28px;height:28px;border-radius:50%;flex-shrink:0;background:linear-gradient(135deg,#7c3aed,#0d9488);display:flex;align-items:center;justify-content:center;font-size:.82rem}
+.stxt{font-size:.77rem;color:var(--muted);line-height:1.55;font-weight:700}
+.stxt strong{color:var(--text)}
+.slink{color:var(--purple);font-weight:800;text-decoration:underline;cursor:pointer;white-space:nowrap}
+
+/* ── WIN SCREEN ─── */
+#s-win{flex:1;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px 0}
+.trophy{font-size:5rem;margin-bottom:12px;animation:trophyin .6s ease both}
+@keyframes trophyin{from{transform:rotate(-20deg) scale(.4);opacity:0}to{transform:rotate(0) scale(1);opacity:1}}
+.wtitle{font-family:'Baloo 2',cursive;font-size:2.2rem;font-weight:800;margin-bottom:8px}
+.wsub{font-size:.88rem;color:var(--muted);font-weight:700;line-height:1.65;max-width:360px;margin:0 auto 26px}
+
+.score-row{display:flex;gap:10px;margin-bottom:22px;flex-wrap:wrap;justify-content:center}
+.sc{padding:14px 20px;border-radius:20px;text-align:center;min-width:90px}
+.sc.s{background:rgba(217,119,6,.1);border:2px solid rgba(217,119,6,.3)}
+.sc.r{background:rgba(21,128,61,.08);border:2px solid rgba(21,128,61,.25)}
+.sc.f{background:rgba(234,88,12,.08);border:2px solid rgba(234,88,12,.25)}
+.sc-n{font-family:'Baloo 2',cursive;font-size:2rem;font-weight:800;display:block;line-height:1}
+.sc.s .sc-n{color:var(--yellow)}.sc.r .sc-n{color:var(--green)}.sc.f .sc-n{color:var(--orange)}
+.sc-l{font-size:.64rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);margin-top:4px;font-weight:800;display:block}
+
+/* topic breakdown */
+.breakdown{width:100%;max-width:440px;background:var(--white);border:2px solid var(--border);border-radius:20px;padding:16px;margin-bottom:22px;text-align:left}
+.breakdown h4{font-size:.68rem;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);font-weight:800;margin-bottom:12px}
+.br-row{display:flex;align-items:center;gap:9px;margin-bottom:8px}
+.br-ico{font-size:.9rem;width:20px;text-align:center;flex-shrink:0}
+.br-nm{font-size:.78rem;font-weight:800;flex:1}
+.br-dots{display:flex;gap:3px}
+.brd{width:10px;height:10px;border-radius:50%;background:var(--sky2)}
+.brd.on{background:var(--green)}
+
+.win-btns{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.btn-again{padding:14px 30px;background:linear-gradient(135deg,var(--blue),var(--purple));border-radius:50px;color:#fff;font-family:'Baloo 2',cursive;font-size:1rem;font-weight:800;box-shadow:0 5px 18px rgba(59,130,246,.3);transition:all .2s}
+.btn-again:hover{transform:translateY(-3px)}
+.btn-home{padding:14px 22px;background:var(--white);border:2px solid var(--border);border-radius:50px;color:var(--muted);font-family:'Baloo 2',cursive;font-size:1rem;font-weight:800;transition:all .15s}
+.btn-home:hover{border-color:var(--blue);color:var(--blue)}
+
+/* ── TOAST ──────── */
+#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(30px);background:var(--text);border-radius:50px;padding:10px 20px;font-size:.82rem;font-weight:800;color:#fff;z-index:400;pointer-events:none;white-space:nowrap;opacity:0;transition:transform .25s,opacity .25s;box-shadow:0 6px 22px rgba(26,39,64,.2)}
+#toast.on{transform:translateX(-50%) translateY(0);opacity:1}
+
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-thumb{background:var(--sky2);border-radius:2px}
+
+@media(max-width:460px){
+  .mode-grid{grid-template-columns:1fr}
+  .hero h2{font-size:1.8rem}
+  .qtext{font-size:1rem}
+  .wtitle{font-size:1.8rem}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <nav>
+    <a class="back" href="index.html">← Home</a>
+    <div class="brand">⚡ Brain Gym</div>
+    <button class="sage-btn" onclick="openSage()"><div class="sdot"></div>Ask Sage</button>
+  </nav>
+
+  <!-- ══ MODE SELECT ══ -->
+  <div id="s-pick">
+    <div class="hero">
+      <div class="hero-badge">🧠 Choose Your Challenge</div>
+      <h2>What are we<br>training today?</h2>
+      <p>Your questions are freshly shuffled every time you play!</p>
+    </div>
+    <div class="mode-grid">
+      <div class="tile" style="--tc:var(--blue)" onclick="go('blast')">
+        <span class="ti">⚡</span>
+        <div class="tn">Brain Blast</div>
+        <div class="td">5 quick questions — fast and fun!</div>
+      </div>
+      <div class="tile" style="--tc:var(--purple)" onclick="go('spotlight')">
+        <span class="ti">🎯</span>
+        <div class="tn">Skill Spotlight</div>
+        <div class="td">Pick one topic and really go for it.</div>
+      </div>
+      <div class="tile" style="--tc:var(--orange)" onclick="go('power')">
+        <span class="ti">🔋</span>
+        <div class="tn">Power Round</div>
+        <div class="td">10 questions — loads of stars to win!</div>
+      </div>
+      <div class="tile" id="champ-tile" style="--tc:#dc2626" onclick="go('champ')">
+        <span class="ti">👑</span>
+        <div class="tn">Champion Run</div>
+        <div class="td">Hardest questions only. Triple stars!</div>
+      </div>
+    </div>
+    <div class="cat-box" id="cat-box">
+      <label>Choose your skill topic</label>
+      <div class="chips" id="chips"></div>
+    </div>
+  </div>
+
+  <!-- ══ LOADING ══ -->
+  <div id="s-load">
+    <div class="ring"></div>
+    <p>Getting your questions ready…</p>
+  </div>
+
+  <!-- ══ GAME ══ -->
+  <div id="s-game">
+    <div class="progress" id="progress"></div>
+    <div class="bar">
+      <span class="qnum" id="qnum">Question 1</span>
+      <div class="star-pill">⭐ <span id="star-total">0</span> stars</div>
+      <div class="fire-pill" id="fire-pill">🔥 <span id="fire-n">2</span> in a row!</div>
+    </div>
+
+    <div class="qcard" id="qcard">
+      <div class="qcard-top">
+        <div class="qcat">
+          <div class="qcat-ico" id="q-ico">🧠</div>
+          <span class="qcat-name" id="q-catname">Topic</span>
+        </div>
+        <div class="lvdots" id="q-dots"></div>
+      </div>
+      <div class="qtext" id="q-text">Loading…</div>
+    </div>
+
+    <div class="hint-wrap">
+      <button class="hint-btn" id="hint-btn" onclick="showHint()">💡 Brain Boost — tap for a hint!</button>
+      <div class="hint-reveal" id="hint-reveal"></div>
+    </div>
+
+    <div class="opts" id="opts"></div>
+
+    <div class="feedback" id="feedback"></div>
+
+    <div class="cheer" id="cheer">
+      <span class="cheer-big" id="cheer-big">🎉</span>
+      <span class="cheer-sm"  id="cheer-sm">Amazing!</span>
+    </div>
+
+    <!-- NEXT BUTTON — always appears, no timer, no auto-advance -->
+    <button class="next-btn" id="next-btn" onclick="nextQ()">Next Question! →</button>
+
+    <div class="sage-box">
+      <div class="sav">🧙</div>
+      <div class="stxt" id="sage-txt">
+        <strong>Sage says:</strong> Read every option carefully before you pick!
+        <span class="slink" onclick="openSage()"> Ask Sage →</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ WIN ══ -->
+  <div id="s-win">
+    <div class="trophy" id="trophy">🏆</div>
+    <div class="wtitle" id="wtitle">Amazing work!</div>
+    <div class="wsub"   id="wsub">You finished the Brain Gym session. Every question makes your brain stronger!</div>
+    <div class="score-row">
+      <div class="sc s"><span class="sc-n" id="w-stars">0</span><span class="sc-l">Stars Won</span></div>
+      <div class="sc r"><span class="sc-n" id="w-right">0/0</span><span class="sc-l">Correct</span></div>
+      <div class="sc f"><span class="sc-n" id="w-fire">0</span><span class="sc-l">Best Streak 🔥</span></div>
+    </div>
+    <div class="breakdown" id="breakdown"></div>
+    <div class="win-btns">
+      <button class="btn-again" onclick="location.reload()">Play Again! 🎮</button>
+      <button class="btn-home"  onclick="location.href='index.html'">Back Home 🏠</button>
+    </div>
+  </div>
+
+</div>
+<div id="toast"></div>
+
+<script>
+/* ══════════════════════════════════════════════
+   CONFIG
+══════════════════════════════════════════════ */
+const TSV_FILE = 'question_bank.tsv';
+const SAGE_URL = localStorage.getItem('ff_ta_link') || 'https://claude.ai';
+
+/* TSV column indices (0-based) */
+const COL = {
+  id:0, cat:1, sub:2, level:3, aud:4,
+  question:5, a:6, b:7, c:8, d:9,
+  correct:10, explanation:11, hint:12, xp:13, tags:14
+};
+
+/* Category display data */
+const CAT = {
+  EMO  : { name:'Emotions',        icon:'💛', color:'#d97706' },
+  SIT  : { name:'Situations',      icon:'👁️',  color:'#7c3aed' },
+  TASK : { name:'Tasks & Planning', icon:'📋', color:'#2563eb' },
+  GOAL : { name:'Goals',           icon:'🎯', color:'#16a34a' },
+  MAN  : { name:'Manners',         icon:'🌟', color:'#0d9488' },
+  CARE : { name:'Self-Care',        icon:'💚', color:'#15803d' },
+  FOCUS: { name:'Focus',           icon:'🔦', color:'#9333ea' },
+  THINK: { name:'Think First',     icon:'🛑', color:'#ea580c' },
+};
+
+/* Celebration messages */
+const WIN_MSG = [
+  ['🌟 Brilliant!',  'You nailed it!'],
+  ['🎉 Amazing!',    'Fantastic answer!'],
+  ['⚡ Superstar!',  'Keep it going!'],
+  ['🔥 On fire!',    'That was perfect!'],
+  ['✨ Wow!',        'Your brain is working great!'],
+  ['🏆 Yes!',        'Absolutely right!'],
+  ['💥 Boom!',       'Right on target!'],
+  ['🦸 Hero!',       'Brain champion!'],
+];
+const MISS_MSG = [
+  ['💪 Good try!',    'You\'ll get the next one!'],
+  ['🌈 Nearly!',      'Have a look at the right answer above.'],
+  ['😊 Keep going!', 'Every try helps you learn.'],
+  ['🧩 Close!',      'The explanation helps you remember.'],
+  ['🚀 Don\'t stop!','Every round makes you stronger.'],
+];
+const SAGE_AFTER_RIGHT = [
+  'Great brain work! 🌟',
+  'You\'re getting stronger every question!',
+  'That\'s the skill building — well done!',
+  'Keep going — you\'re on a roll!',
+];
+const SAGE_AFTER_WRONG = [
+  'Good try! Look at the correct answer above.',
+  'That one was tricky — now you know it!',
+  'Every miss is a lesson — keep going!',
+  'Read the explanation below — it really helps!',
+];
+const SAGE_TIPS = {
+  EMO  : ['Think about how that feeling would actually feel in your body.', 'Which feeling matches the situation best?'],
+  SIT  : ['Look at what the people around you are doing. What does the room feel like?', 'Think about how this would seem to everyone else.'],
+  TASK : ['Break it into steps — what needs to happen first?', 'Think about the logical order.'],
+  GOAL : ['Small steps every day add up to big changes over time.', 'What would someone who achieved this have done differently?'],
+  MAN  : ['Think about how each option would make the other person feel.', 'What would the kindest AND most sensible choice be?'],
+  CARE : ['What does your body actually need right now?', 'Think about what helps you feel your best.'],
+  FOCUS: ['What happens to your thinking every time you get distracted?', 'One thing at a time — you\'ve got this!'],
+  THINK: ['Count to three before you do anything. What feels right after those three seconds?', 'Think about how each choice will feel in ten minutes.'],
+};
+
+/* ══════════════════════════════════════════════
+   STATE
+══════════════════════════════════════════════ */
+const ld = (k,d) => { try{ return JSON.parse(localStorage.getItem('ff_'+k))??d }catch{ return d }};
+const sv = (k,v) => localStorage.setItem('ff_'+k, JSON.stringify(v));
+
+const playerLv = getLvNum(ld('xp',0));
+
+let ROWS=[], Q=[], idx=0;
+let earned=0, hits=0, combo=0, bestCombo=0;
+let hintShown=false, hintUsedCount=0;
+let sessionMode='blast', sessionCat=null;
+let catLog={};  /* cat → {correct, total} */
+
+/* ══════════════════════════════════════════════
+   BOOT
+══════════════════════════════════════════════ */
+window.addEventListener('DOMContentLoaded', () => {
+  /* Lock Champion until level 5 */
+  if(playerLv < 5){
+    const ct = document.getElementById('champ-tile');
+    ct.classList.add('off');
+    ct.innerHTML += '<span class="tlock">🔒 Level 5</span>';
+  }
+  buildChips();
+  show('s-pick');
+});
+
+/* ══════════════════════════════════════════════
+   MODE / CATEGORY SELECTION
+══════════════════════════════════════════════ */
+function buildChips(){
+  document.getElementById('chips').innerHTML = Object.entries(CAT).map(([code,c])=>`
+    <div class="chip" data-code="${code}"
+      style="border-color:${c.color}40"
+      onclick="pickCat(this,'${code}')">
+      ${c.icon} ${c.name}
+    </div>`).join('');
+}
+
+function pickCat(el, code){
+  sessionCat = code;
+  document.querySelectorAll('.chip').forEach(c=>{
+    c.classList.remove('on');
+    c.style.background='';
+    c.style.color='';
+    c.style.borderColor=CAT[c.dataset.code].color+'40';
+  });
+  el.classList.add('on');
+  el.style.background   = CAT[code].color;
+  el.style.color        = '#fff';
+  el.style.borderColor  = CAT[code].color;
+}
+
+function go(mode){
+  if(mode==='champ' && playerLv<5){ toast('🔒 Champion Run unlocks at Level 5!'); return; }
+  sessionMode = mode;
+  if(mode==='spotlight'){
+    document.getElementById('cat-box').style.display='block';
+    if(!sessionCat){ toast('Choose a skill topic first! 👆'); return; }
+  }
+  loadTSV();
+}
+
+/* ══════════════════════════════════════════════
+   LOAD TSV
+══════════════════════════════════════════════ */
+async function loadTSV(){
+  hide('s-pick'); show('s-load');
+  try{
+    const res = await fetch(TSV_FILE);
+    if(!res.ok) throw new Error('File not found');
+    const text = await res.text();
+    /* parse — skip header row */
+    ROWS = text.trim().split('\n').slice(1)
+      .map(line => line.split('\t'))
+      .filter(r => r.length >= 11); /* must have at least through correct column */
+
+    buildSession();
+    hide('s-load');
+    drawProgress();
+    renderQ();
+    show('s-game');
+  } catch(e){
+    document.getElementById('s-load').innerHTML=`
+      <div style="font-size:3rem;margin-bottom:10px">😬</div>
+      <p style="font-family:'Baloo 2',cursive;font-size:1.2rem;font-weight:800;margin-bottom:6px">File not found!</p>
+      <p style="font-size:.82rem;color:var(--muted);font-weight:700">Put <strong>question_bank.tsv</strong> in the same folder as this file.</p>
+      <a href="index.html" style="color:#3b82f6;font-weight:800;margin-top:14px;display:inline-block">← Go Home</a>`;
+  }
+}
+
+/* ══════════════════════════════════════════════
+   BUILD SESSION — filter and pick questions
+══════════════════════════════════════════════ */
+function buildSession(){
+  const QN = sessionMode === 'power' ? 10 : 5;
+
+  let pool = [...ROWS];
+
+  /* Level filter */
+  if(sessionMode === 'champ')     pool = pool.filter(r => parseInt(r[COL.level]) === 3);
+  else if(sessionMode === 'blast') pool = pool.filter(r => parseInt(r[COL.level]) <= 2);
+
+  /* Category filter */
+  if(sessionMode === 'spotlight' && sessionCat)
+    pool = pool.filter(r => r[COL.cat].trim() === sessionCat);
+
+  /* Shuffle and take QN */
+  Q = shuffle([...pool]).slice(0, Math.min(QN, pool.length));
+
+  /* Init category log */
+  Object.keys(CAT).forEach(c => catLog[c] = {correct:0, total:0});
+}
+
+/* ══════════════════════════════════════════════
+   PROGRESS PIPS
+══════════════════════════════════════════════ */
+function drawProgress(){
+  document.getElementById('progress').innerHTML =
+    Q.map((_,i) => `<div class="pip" id="pip-${i}">⭐</div>`).join('');
+  refreshPips();
+}
+function refreshPips(){
+  Q.forEach((_,i) => {
+    const el = document.getElementById('pip-'+i);
+    if(!el) return;
+    el.className = 'pip' + (i<idx?' done' : i===idx?' active':'');
+  });
+}
+
+/* ══════════════════════════════════════════════
+   RENDER QUESTION
+══════════════════════════════════════════════ */
+function renderQ(){
+  if(idx >= Q.length){ showWin(); return; }
+
+  const r    = Q[idx];
+  const code = r[COL.cat]?.trim() || 'EMO';
+  const cat  = CAT[code] || CAT.EMO;
+  const lv   = parseInt(r[COL.level]) || 1;
+  hintShown  = false;
+
+  /* counter + pips */
+  document.getElementById('qnum').textContent = `Question ${idx+1} of ${Q.length}`;
+  refreshPips();
+
+  /* card colour */
+  document.getElementById('qcard').style.setProperty('--cc', cat.color);
+
+  /* category chip */
+  const ico = document.getElementById('q-ico');
+  ico.textContent     = cat.icon;
+  ico.style.background = cat.color + '22';
+
+  const cn = document.getElementById('q-catname');
+  cn.textContent = cat.name;
+  cn.style.color = cat.color;
+
+  /* difficulty dots */
+  document.getElementById('q-dots').innerHTML =
+    [1,2,3].map(d =>
+      `<div class="lvd${d<=lv?' on':''}" ${d<=lv?'style="background:'+cat.color+'"':''}></div>`
+    ).join('');
+
+  /* question text */
+  document.getElementById('q-text').textContent = r[COL.question] || '';
+
+  /* build options — shuffle positions but track which is correct */
+  const options = [
+    { letter:'a', text: r[COL.a] || '' },
+    { letter:'b', text: r[COL.b] || '' },
+    { letter:'c', text: r[COL.c] || '' },
+    { letter:'d', text: r[COL.d] || '' },
+  ].filter(o => o.text.trim() !== '');
+
+  const correctLetter = (r[COL.correct] || 'a').trim().toLowerCase();
+  const shuffled = shuffle([...options]);
+
+  document.getElementById('opts').innerHTML = shuffled.map((o, i) => {
+    const labels = ['A','B','C','D'];
+    return `<button class="opt"
+      data-letter="${o.letter}"
+      data-correct="${correctLetter}"
+      data-explain="${encodeURIComponent(r[COL.explanation]||'')}"
+      data-xp="${parseInt(r[COL.xp])||10}"
+      onclick="answer(this)">
+      <span class="opt-letter">${labels[i]}</span>
+      <span class="opt-text">${o.text}</span>
+    </button>`;
+  }).join('');
+
+  /* reset hint */
+  const hb = document.getElementById('hint-btn');
+  hb.style.display = 'block';
+  hb.disabled      = false;
+  document.getElementById('hint-reveal').style.display = 'none';
+
+  /* reset feedback / cheer / next button */
+  document.getElementById('feedback').style.display  = 'none';
+  document.getElementById('cheer').style.display     = 'none';
+  document.getElementById('next-btn').style.display  = 'none';
+
+  /* fire pill */
+  const fp = document.getElementById('fire-pill');
+  if(combo >= 2){
+    document.getElementById('fire-n').textContent = combo;
+    fp.classList.add('on');
+  } else {
+    fp.classList.remove('on');
+  }
+
+  /* sage tip for this category */
+  const tips = SAGE_TIPS[code] || ['Read every option carefully before you choose!'];
+  document.getElementById('sage-txt').innerHTML =
+    `<strong>Sage says:</strong> ${rnd(tips)} <span class="slink" onclick="openSage()"> Ask Sage →</span>`;
+
+  /* animate card in */
+  const card = document.getElementById('qcard');
+  card.style.animation='none';
+  void card.offsetWidth;
+  card.style.animation='';
+}
+
+/* ══════════════════════════════════════════════
+   ANSWER
+══════════════════════════════════════════════ */
+function answer(btn){
+  /* read data attrs — safe, no string escaping issues */
+  const chosen  = btn.dataset.letter;
+  const correct = btn.dataset.correct;
+  const explain = decodeURIComponent(btn.dataset.explain);
+  const xpVal   = parseInt(btn.dataset.xp) || 10;
+  const isRight = chosen === correct;
+
+  /* lock all options */
+  document.querySelectorAll('.opt').forEach(opt => {
+    opt.disabled = true;
+    const ol = opt.dataset.letter;
+    if(ol === correct){
+      opt.classList.add(isRight && ol === chosen ? 'correct' : 'reveal');
+    }
+    if(!isRight && ol === chosen){
+      opt.classList.add('wrong');
+    }
+  });
+
+  /* stars */
+  const pts = isRight ? xpVal : 0;
+  if(pts > 0){
+    earned += pts;
+    const st = document.getElementById('star-total');
+    st.textContent = earned;
+    st.classList.add('bump');
+    setTimeout(() => st.classList.remove('bump'), 350);
+    saveXP(pts);
+  }
+
+  /* combo */
+  if(isRight){
+    combo++;
+    bestCombo = Math.max(bestCombo, combo);
+    hits++;
+  } else {
+    combo = 0;
+    document.getElementById('fire-pill').classList.remove('on');
+  }
+
+  /* category log */
+  const code = Q[idx]?.[COL.cat]?.trim() || 'EMO';
+  if(!catLog[code]) catLog[code]={correct:0,total:0};
+  catLog[code].total++;
+  if(isRight) catLog[code].correct++;
+
+  /* celebration / feedback */
+  if(isRight){
+    const [big,sm] = rnd(WIN_MSG);
+    document.getElementById('cheer-big').textContent = big;
+    document.getElementById('cheer-sm').textContent  = sm;
+    document.getElementById('cheer').style.display   = 'block';
+    document.getElementById('feedback').style.display = 'none';
+  } else {
+    const [big,sm] = rnd(MISS_MSG);
+    const fb = document.getElementById('feedback');
+    fb.className = 'feedback bad';
+    fb.innerHTML = `${big} ${sm}${explain ? '<br><br>' + explain : ''}`;
+    fb.style.display = 'block';
+    document.getElementById('cheer').style.display = 'none';
+  }
+
+  /* sage comment */
+  const msgs = isRight ? SAGE_AFTER_RIGHT : SAGE_AFTER_WRONG;
+  document.getElementById('sage-txt').innerHTML =
+    `<strong>Sage says:</strong> ${rnd(msgs)} <span class="slink" onclick="openSage()"> Ask Sage →</span>`;
+
+  /* hint button gone */
+  document.getElementById('hint-btn').style.display = 'none';
+
+  /* NEXT BUTTON — always shows, unconditional */
+  document.getElementById('next-btn').style.display = 'block';
+}
+
+/* ══════════════════════════════════════════════
+   HINT
+══════════════════════════════════════════════ */
+function showHint(){
+  if(hintShown) return;
+  hintShown = true;
+  hintUsedCount++;
+  const r = Q[idx];
+  const hintText = r?.[COL.hint] || 'Think carefully about every option!';
+  document.getElementById('hint-reveal').textContent  = '💡 ' + hintText;
+  document.getElementById('hint-reveal').style.display = 'block';
+  document.getElementById('hint-btn').style.display   = 'none';
+  earned = Math.max(0, earned - 2);
+  document.getElementById('star-total').textContent = earned;
+  toast('💡 Hint revealed! (-2 stars)');
+}
+
+/* ══════════════════════════════════════════════
+   NEXT QUESTION
+══════════════════════════════════════════════ */
+function nextQ(){
+  document.getElementById('next-btn').style.display = 'none'; /* prevent double-tap */
+  idx++;
+  renderQ();
+}
+
+/* ══════════════════════════════════════════════
+   WIN SCREEN
+══════════════════════════════════════════════ */
+function showWin(){
+  const total = Q.length;
+  const pct   = total > 0 ? Math.round((hits/total)*100) : 0;
+
+  let icon, title, sub;
+  if(pct >= 80){
+    icon='🏆'; title='Incredible!';
+    sub='You got most of them right. Your brain is seriously powerful!';
+  } else if(pct >= 50){
+    icon='🌟'; title='Great work!';
+    sub='Really solid session. The ones you got wrong are already teaching you — that\'s how brains grow!';
+  } else {
+    icon='💪'; title='You did it!';
+    sub='Every session makes you stronger — even when it\'s hard. Come back and try again, you\'ll see the difference!';
+  }
+
+  document.getElementById('trophy').textContent = icon;
+  document.getElementById('wtitle').textContent = title;
+  document.getElementById('wsub').textContent   = sub;
+  document.getElementById('w-stars').textContent = earned;
+  document.getElementById('w-right').textContent = `${hits}/${total}`;
+  document.getElementById('w-fire').textContent  = bestCombo;
+
+  /* topic breakdown */
+  const bd = document.getElementById('breakdown');
+  const active = Object.entries(catLog).filter(([,v])=>v.total>0);
+  if(active.length){
+    bd.innerHTML = '<h4>How you did by topic</h4>' +
+      active.map(([code,v]) => {
+        const cat = CAT[code] || {name:code, icon:'⚡', color:'#3b82f6'};
+        const dots = Array.from({length:v.total}, (_,i) =>
+          `<div class="brd${i<v.correct?' on':''}"></div>`).join('');
+        return `<div class="br-row">
+          <span class="br-ico">${cat.icon}</span>
+          <span class="br-nm" style="color:${cat.color}">${cat.name}</span>
+          <div class="br-dots">${dots}</div>
+        </div>`;
+      }).join('');
+  } else {
+    bd.style.display = 'none';
+  }
+
+  /* badge — hint-free */
+  if(hintUsedCount === 0 && total >= 5){
+    const b = ld('badges',{});
+    if(!b.badge_nohint){ b.badge_nohint=Date.now(); sv('badges',b); toast('🏅 Badge: Hint-Free Hero!'); }
+  }
+
+  hide('s-game');
+  show('s-win');
+}
+
+/* ══════════════════════════════════════════════
+   XP WRITE-BACK
+══════════════════════════════════════════════ */
+function saveXP(pts){
+  let xp = ld('xp',0); xp += pts; sv('xp', xp);
+  sv('sessions', ld('sessions',0)+1);
+  const today = new Date().toDateString();
+  let streak = ld('streak',0), lastDate = ld('lastDate','');
+  if(lastDate !== today){
+    const yest = new Date(Date.now()-86400000).toDateString();
+    streak = (lastDate === yest) ? streak+1 : 1;
+    sv('streak', streak); sv('lastDate', today);
+  }
+  const code = Q[idx]?.[COL.cat]?.trim();
+  if(code){ const dc=ld('doneCats',{}); dc[code]=(dc[code]||0)+1; sv('doneCats',dc); }
+  const hist = ld('history',[]);
+  hist.push({
+    ts: Date.now(), mode: sessionMode, cat: code, xp: pts,
+    score: Math.round((hits/Math.max(Q.length,1))*100)+'%',
+    level: getLvNum(xp)
+  });
+  sv('history', hist.slice(-50)); /* keep last 50 */
+}
+
+/* ══════════════════════════════════════════════
+   UTILS
+══════════════════════════════════════════════ */
+function getLvNum(v){
+  const T=[0,200,500,1000,1800,2800,4000,6000];
+  let n=1; T.forEach((t,i)=>{ if(v>=t) n=i+1; }); return n;
+}
+function shuffle(a){ return a.sort(()=>Math.random()-.5); }
+function rnd(a){ return a[Math.floor(Math.random()*a.length)]; }
+function show(id){ document.getElementById(id).style.display='flex'; }
+function hide(id){ document.getElementById(id).style.display='none'; }
+function openSage(){
+  const r = Q[idx];
+  const q = r ? encodeURIComponent((r[COL.question]||'').slice(0,80)) : '';
+  const c = r ? encodeURIComponent(r[COL.cat]||'') : '';
+  window.open(SAGE_URL+'?cat='+c+'&q='+q, '_blank');
+}
+let _tt;
+function toast(msg){
+  const el=document.getElementById('toast');
+  el.textContent=msg; el.classList.add('on');
+  clearTimeout(_tt); _tt=setTimeout(()=>el.classList.remove('on'),3000);
+}
+</script>
+</body>
+</html>
