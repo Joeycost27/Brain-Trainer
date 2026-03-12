@@ -427,20 +427,22 @@ const BADGES=[
   {id:'badge_er',     e:'💛',n:'Emotion Expert', c:'#ff7eb3',t:'First Emotional Reg'},
   {id:'badge_rw',     e:'🌍',n:'Life Forge',     c:'#4da6ff',t:'First Real-World card'},
   {id:'badge_tp',     e:'📋',n:'Blueprint Pro',  c:'#a278ff',t:'First Tech Planning'},
-  {id:'badge_allcats',e:'🏆',n:'All 7 Cats',    c:'#ffd447',t:'All 7 category badges'},
+  {id:'badge_allcats',e:'🏆',n:'All 9 Cats',    c:'#ffd447',t:'All 7 category badges'},
   {id:'badge_boss',   e:'👹',n:'Boss Slayer',    c:'#ff5e7d',t:'Complete a Boss Round'},
   {id:'badge_99',     e:'💎',n:'Full Deck',      c:'#9b6dff',t:'All 99 reference cards done'},
   {id:'badge_speed',  e:'⚡',n:'Speed Demon',    c:'#00e5cc',t:'5 correct answers under 5s'},
   {id:'badge_nohint', e:'🧩',n:'Hint-Free',      c:'#5cff8f',t:'Full game with 0 hints'},
 ];
 const CATS=[
-  {k:'Executive Function',    i:'🧠',c:'#ff5e5e'},
-  {k:'Working Memory',        i:'💾',c:'#00d4c8'},
-  {k:'Focus Stamina',         i:'🎯',c:'#ffcc00'},
-  {k:'Impulse Management',    i:'🛑',c:'#4cd97b'},
-  {k:'Emotional Regulation',  i:'💛',c:'#ff7eb3'},
-  {k:'Real-World Application',i:'🌍',c:'#4da6ff'},
-  {k:'Technical Planning',    i:'📋',c:'#a278ff'},
+  {k:'EMO',  n:'Emotions',         i:'💛',c:'#d97706'},
+  {k:'SIT',  n:'Situations',       i:'👁️', c:'#7c3aed'},
+  {k:'THINK',n:'Think First',      i:'🛑',c:'#ea580c'},
+  {k:'MAN',  n:'Manners',          i:'🌟',c:'#0d9488'},
+  {k:'CARE', n:'Self-Care',        i:'💚',c:'#15803d'},
+  {k:'GOAL', n:'Goals',            i:'🎯',c:'#16a34a'},
+  {k:'LEAD', n:'Leadership',       i:'🦁',c:'#2563eb'},
+  {k:'FOCUS',n:'Focus',            i:'🔦',c:'#9333ea'},
+  {k:'TASK', n:'Tasks & Planning', i:'📋',c:'#b8722a'},
 ];
 const AVATARS=['🧠','🦊','🐺','🦅','🐉','🦁','🤖','🧙','🦸','⚡'];
 
@@ -525,9 +527,9 @@ function checkBadges(){
   if(streak>=3)unlock('badge_3str');
   if(streak>=7)unlock('badge_7str');
   if(dc>=99)unlock('badge_99');
-  const cmap={'Executive Function':'badge_ef','Working Memory':'badge_wm','Focus Stamina':'badge_fs',
-    'Impulse Management':'badge_im','Emotional Regulation':'badge_er',
-    'Real-World Application':'badge_rw','Technical Planning':'badge_tp'};
+  const cmap={'EMO':'badge_ef','SIT':'badge_rw','THINK':'badge_im',
+    'MAN':'badge_wm','CARE':'badge_fs','GOAL':'badge_er','LEAD':'badge_tp',
+    'FOCUS':'badge_fo','TASK':'badge_tk'};
   Object.entries(cmap).forEach(([cat,bid])=>{if(doneCats[cat])unlock(bid)});
   if(Object.keys(cmap).every(cat=>!!doneCats[cat]))unlock('badge_allcats');
 }
@@ -556,13 +558,11 @@ function renderFeed(){
 /* ── CAT PROGRESS ────────────────────────────── */
 function renderCats(){
   const active=CATS.filter(c=>doneCats[c.k]).length;
-  document.getElementById('cat-count').textContent=`${active} / 7 categories started`;
+  document.getElementById('cat-count').textContent=`${active} / 9 categories started`;
   document.getElementById('cat-bars').innerHTML=CATS.map(c=>{
     const n=doneCats[c.k]||0,pct=Math.min(Math.round((n/14)*100),100);
-    const short=c.k.replace(' Application','').replace(' Management','')
-      .replace(' Regulation','').replace(' Function','').replace(' Stamina','');
     return`<div class="cat-bar-row">
-      <div class="cat-bar-lbl" style="color:${c.c}"><span>${c.i}</span>${short}</div>
+      <div class="cat-bar-lbl" style="color:${c.c}"><span>${c.i}</span>${c.n}</div>
       <div class="cat-bar-track"><div class="cat-bar-fill" style="--bc:${c.c};width:${pct}%"></div></div>
       <div class="cat-bar-pct">${pct}%</div>
     </div>`;
